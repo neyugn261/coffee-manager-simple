@@ -4,11 +4,11 @@ import type { Status } from './types'
 // Backend: 'empty' | 'occupied' → Frontend display labels
 export const STATUS_LABELS = {
     empty: {
-        label: '� Trống',
+        label: 'Trống',
         color: 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-300',
     },
     occupied: {
-        label: '� Có khách',
+        label: 'Có khách',
         color: 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-300',
     },
 } as const

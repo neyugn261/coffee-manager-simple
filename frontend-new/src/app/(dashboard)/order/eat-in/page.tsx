@@ -85,13 +85,12 @@ export default function EatInIndex() {
             )}
 
             {/* Stats Header */}
-            <div className="bg-card/50 flex-shrink-0 border-b p-4">
-                <div className="flex flex-wrap items-center gap-4">
-                    <h2 className="text-foreground flex items-center gap-2 text-lg font-semibold">
-                        <span className="text-xl">📊</span>
+            <div className="bg-card/50 flex-shrink-0 border-b py-4 select-none">
+                <div className="flex flex-wrap items-center justify-center gap-4 md:justify-start">
+                    <h2 className="text-foreground hidden items-center gap-2 px-6 text-lg font-semibold md:flex">
                         Thống kê bàn
                     </h2>
-                    <div className="flex flex-wrap gap-2 text-xs">
+                    <div className="flex flex-row flex-wrap items-center gap-2 text-xs">
                         <span className="bg-primary/10 text-primary border-primary/20 rounded-full border px-3 py-1 font-medium">
                             Tổng: {tableCount} bàn
                         </span>
@@ -109,7 +108,7 @@ export default function EatInIndex() {
 
             {/* Tables Grid */}
             <div className="scrollable-area flex-1 overflow-y-auto">
-                <div className="p-6">
+                <div className="mx-auto max-w-6xl p-8">
                     {tables.length === 0 ? (
                         <div className="text-muted-foreground flex flex-col items-center justify-center py-16 text-center">
                             <div className="mb-4 text-6xl">🪑</div>
@@ -119,7 +118,7 @@ export default function EatInIndex() {
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-[repeat(auto-fill,minmax(250px,1fr))]">
                             {tables.map((table) => (
                                 <Link key={table.id} href={`/order/eat-in/${table.id}`}>
                                     <Card className="group border-border/40 hover:border-primary/20 hover:bg-card/80 cursor-pointer p-1 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
