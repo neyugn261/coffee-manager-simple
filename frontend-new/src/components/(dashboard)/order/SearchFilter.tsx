@@ -22,23 +22,42 @@ export default function SearchFilter({
     setCategory: (v: Category) => void
 }) {
     return (
-        <div className="xs:flex-wrap flex w-full gap-3 px-5 pb-3">
-            <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Tìm món"
-                className="flex-10"
-            />
-            <Select value={category} onValueChange={(v) => setCategory(v as Category)}>
-                <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Loại" />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">Tất cả</SelectItem>
-                    <SelectItem value="drink">Đồ uống</SelectItem>
-                    <SelectItem value="food">Đồ ăn</SelectItem>
-                </SelectContent>
-            </Select>
+        <div className="flex w-full flex-col gap-3 sm:flex-row">
+            <div className="flex-1">
+                <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="🔍 Tìm kiếm món ăn..."
+                    className="bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 h-12 rounded-xl border-2 px-4 text-base transition-all focus:ring-2"
+                />
+            </div>
+            <div className="min-w-[160px] sm:min-w-[180px]">
+                <Select value={category} onValueChange={(v) => setCategory(v as Category)}>
+                    <SelectTrigger className="bg-card border-border text-foreground focus:border-primary focus:ring-primary/20 h-12 rounded-xl border-2 px-4 text-base transition-all focus:ring-2">
+                        <SelectValue placeholder="📂 Loại món" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-card border-border text-foreground rounded-xl border shadow-lg">
+                        <SelectItem
+                            value="all"
+                            className="hover:bg-primary/10 rounded-lg px-3 py-2"
+                        >
+                            🍽️ Tất cả
+                        </SelectItem>
+                        <SelectItem
+                            value="drink"
+                            className="hover:bg-primary/10 rounded-lg px-3 py-2"
+                        >
+                            ☕ Đồ uống
+                        </SelectItem>
+                        <SelectItem
+                            value="food"
+                            className="hover:bg-primary/10 rounded-lg px-3 py-2"
+                        >
+                            🍕 Đồ ăn
+                        </SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
         </div>
     )
 }

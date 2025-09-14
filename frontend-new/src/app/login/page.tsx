@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Image from 'next/image'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faCoffee, faInfoCircle } from '@fortawesome/free-solid-svg-icons'
 
 export default function LoginPage() {
     const [code, setCode] = useState('')
@@ -78,45 +80,59 @@ export default function LoginPage() {
     return (
         <div className="bg-background flex h-full items-center justify-center px-4">
             <Card className="w-full max-w-md p-6">
-                <CardHeader className="text-center">
-                    <div className="mx-auto mb-4 flex items-center justify-center rounded-full bg-purple-500">
-                        <Image width={200} height={200} src="/logo.jpg" alt="Logo" />
+                <CardHeader className="text-center select-none">
+                    <div className="mx-auto mb-4 flex items-center justify-center rounded-full">
+                        <Image
+                            width={120}
+                            height={120}
+                            src="/logo.jpg"
+                            alt="Logo"
+                            className="transform cursor-pointer rounded-3xl shadow-2xl hover:scale-105"
+                        />
                     </div>
-                    <CardTitle className="text-foreground text-4xl">Coffee Manager</CardTitle>
+                    <CardTitle className="text-foreground flex flex-row items-center justify-center gap-3 text-3xl">
+                        <FontAwesomeIcon icon={faCoffee} className="h-8 w-8" />
+                        Coffee Manager
+                    </CardTitle>
                     <CardDescription className="text-secondary">
                         Nhập mã code để đăng nhập
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleLogin} className="space-y-4">
+                    <form onSubmit={handleLogin} className="space-y-4 select-none">
+                        <label
+                            htmlFor="code"
+                            className="flex flex-row items-center justify-between text-sm font-bold"
+                        >
+                            Nhập mã xác thực
+                            {error && (
+                                <div className="text-center text-sm text-red-500">{error}</div>
+                            )}
+                        </label>
                         <div>
                             <Input
+                                name="code"
                                 type="password"
-                                placeholder="Nhập mã code"
+                                placeholder="Nhập mã xác thực"
                                 value={code}
                                 onChange={(e) => setCode(e.target.value)}
-                                className="text-center font-mono text-lg"
+                                className="text-center text-lg"
                                 autoFocus
                                 disabled={loading}
                             />
                         </div>
 
-                        {error && (
-                            <div className="rounded-md bg-red-50 p-3 text-center text-sm text-red-500">
-                                {error}
-                            </div>
-                        )}
-
                         <Button
                             type="submit"
-                            className="w-full bg-purple-500 hover:bg-purple-600"
+                            className="bg-primary hover:bg-primary/50 w-full"
                             disabled={loading || !code.trim()}
                         >
                             {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                         </Button>
                     </form>
 
-                    <p className="mt-6 text-center text-xs text-stone-500">
+                    <p className="text-secondary mt-6 text-center text-xs select-none">
+                        <FontAwesomeIcon icon={faInfoCircle} className="mr-2" />
                         Vui lòng liên hệ admin để nhận code!
                     </p>
                 </CardContent>
