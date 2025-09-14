@@ -33,7 +33,7 @@ export default function Order() {
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
                     {orderMethods.map((method) => (
                         <Link key={method.label} href={method.href}>
-                            <Card className="group bg-card hover:bg-secondary h-auto transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+                            <Card className="group bg-card h-auto transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
                                 {/* Logo */}
                                 <div className="flex items-center justify-center p-8 sm:p-12">
                                     <div className="text-foreground transition-transform duration-300 group-hover:scale-110 [&_svg]:h-16 [&_svg]:w-16 sm:[&_svg]:h-20 sm:[&_svg]:w-20 lg:[&_svg]:h-24 lg:[&_svg]:w-24">
