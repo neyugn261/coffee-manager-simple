@@ -12,6 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { CirclePlus, List, Trash } from 'lucide-react'
 
 interface FormData {
     name: string
@@ -63,7 +64,7 @@ export default function TableEditor() {
     }, [form, isFormValid, createTable])
 
     const handleDelete = useCallback(
-        async (id: string) => {
+        async (id: number) => {
             if (window.confirm('Bạn có chắc muốn xoá bàn này?')) {
                 await deleteTable(id)
             }
@@ -128,8 +129,8 @@ export default function TableEditor() {
             {/* Form Card */}
             <Card className="h-fit xl:w-1/3 xl:flex-shrink-0">
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                        <span className="text-2xl">🪑</span>
+                    <CardTitle className="flex items-center justify-start gap-4 text-lg sm:text-xl">
+                        <CirclePlus />
                         Thêm bàn mới
                     </CardTitle>
                     <p className="text-muted-foreground text-sm">
@@ -158,7 +159,7 @@ export default function TableEditor() {
                                 Đang thêm...
                             </div>
                         ) : (
-                            '🪑 Thêm bàn'
+                            'Thêm bàn'
                         )}
                     </Button>
                 </CardContent>
@@ -169,13 +170,8 @@ export default function TableEditor() {
                 <CardHeader className="flex-shrink-0">
                     <div className="flex items-center justify-between">
                         <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                            🪑 Danh sách bàn
+                            <List /> Danh sách bàn
                         </CardTitle>
-                        <div className="flex flex-wrap gap-2 text-xs">
-                            <span className="rounded-full bg-blue-100 px-2 py-1 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
-                                📊 Tổng: {tableCount} bàn
-                            </span>
-                        </div>
                     </div>
                 </CardHeader>
                 <CardContent className="flex min-h-0 flex-1 flex-col p-0">
@@ -207,12 +203,11 @@ export default function TableEditor() {
                                         >
                                             <TableCell className="py-3 font-medium">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-lg">🪑</span>
-                                                    <span>{table.name}</span>
+                                                    <span>{table.table_name}</span>
                                                 </div>
                                             </TableCell>
                                             <TableCell className="py-3">
-                                                <div className="flex justify-center opacity-60 transition-opacity group-hover:opacity-100">
+                                                <div className="flex justify-end px-5 opacity-60 transition-opacity group-hover:opacity-100">
                                                     <Button
                                                         size="sm"
                                                         variant="destructive"
@@ -220,7 +215,7 @@ export default function TableEditor() {
                                                         className="h-7 px-2 text-xs"
                                                         disabled={loading}
                                                     >
-                                                        🗑️
+                                                        <Trash />
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -243,8 +238,8 @@ export default function TableEditor() {
 
                     {/* Summary */}
                     <div className="text-muted-foreground mt-4 flex flex-shrink-0 items-center justify-center gap-4 text-sm">
-                        <span className="bg-muted/50 rounded-full px-3 py-1.5 font-medium">
-                            📊 Tổng cộng: {tableCount} bàn
+                        <span className="bg-secondary/20 rounded-full px-3 py-1.5 font-medium">
+                            Tổng cộng: {tableCount} bàn
                         </span>
                     </div>
                 </CardContent>

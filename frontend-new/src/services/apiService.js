@@ -88,7 +88,11 @@ const apiService = {
         // POST /api/tables - Tạo bàn mới
         // body: { table_name }
         create: async (data) => {
-            const response = await api.post('/tables', data)
+            // Map frontend 'name' to backend 'table_name'
+            const backendData = {
+                table_name: data.name || data.table_name,
+            }
+            const response = await api.post('/tables', backendData)
             return response.data
         },
 
@@ -122,6 +126,23 @@ const apiService = {
         updateStatus: async (id, status) => {
             const response = await api.patch(`/tables/${id}/status`, { status })
             return response.data
+        },
+
+        // PUT /api/tables/:id - Cập nhật thông tin bàn
+        // body: { table_name }
+        update: async (id, data) => {
+            // Map frontend 'name' to backend 'table_name'
+            const backendData = {
+                table_name: data.name || data.table_name,
+            }
+            const response = await api.put(`/tables/${id}`, backendData)
+            return response.data
+        },
+
+        // DELETE /api/tables/:id - Xóa bàn
+        delete: async (id) => {
+            const response = await api.delete(`/tables/${id}`)
+            return response
         },
     },
 

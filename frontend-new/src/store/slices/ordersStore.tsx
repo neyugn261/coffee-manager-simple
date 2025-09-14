@@ -7,7 +7,7 @@
 
 import { createContext, useContext, useReducer, useCallback, ReactNode } from 'react'
 import apiService from '../../services/apiService.js'
-import type { Order, Status, OrderLine } from '../../lib/types'
+import type { Order, OrderStatus, OrderLine } from '../../lib/types'
 
 // State types
 interface OrdersState {
@@ -46,7 +46,7 @@ interface OrdersContextType {
                 notes?: string
             }>,
         ) => Promise<void>
-        updateOrderStatus: (id: string, status: Status) => Promise<void>
+        updateOrderStatus: (id: string, status: OrderStatus) => Promise<void>
         attachServer: (id: string, serverId: number) => Promise<void>
         addLine: (id: string, line: OrderLine) => Promise<void>
         updateLine: (orderId: string, lineIndex: number, line: Partial<OrderLine>) => Promise<void>
@@ -187,7 +187,7 @@ export function OrdersProvider({ children }: { children: ReactNode }) {
         [],
     )
 
-    const updateOrderStatus = useCallback(async (id: string, status: Status) => {
+    const updateOrderStatus = useCallback(async (id: string, status: OrderStatus) => {
         dispatch({ type: 'FETCH_START' })
         try {
             // The API service only supports payment status updates (unpaid/paid)

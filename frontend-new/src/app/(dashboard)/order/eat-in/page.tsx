@@ -6,7 +6,7 @@ import Header from '@/components/(dashboard)/Header'
 import StatusBadge from '@/components/(dashboard)/order/StatusBadge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useTables } from '@/store'
-import { getStatusInfo } from '@/lib/statuses'
+import { getAllStatuses } from '@/lib/statuses'
 import type { Status } from '@/lib/types'
 
 export default function EatInIndex() {
@@ -56,31 +56,51 @@ export default function EatInIndex() {
             <Header backLink="/order" title="Danh sách bàn" />
 
             {error && (
-                <div className="bg-destructive/10 text-destructive border-destructive/20 mx-4 mt-4 rounded-lg border p-4 text-sm">
-                    <div className="flex items-start gap-3">
-                        <div className="text-lg">⚠️</div>
-                        <div>
-                            <div className="font-medium">Có lỗi xảy ra</div>
-                            <div className="mt-1">{error}</div>
+                <div className="animate-in slide-in-from-right-full fixed top-4 right-4 z-50 max-w-md">
+                    <div className="rounded-lg border border-red-200 bg-red-50 p-4 shadow-lg">
+                        <div className="flex items-start gap-3">
+                            <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-red-100">
+                                <span className="text-sm font-medium text-red-600">!</span>
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-sm font-medium text-red-800">Có lỗi xảy ra</p>
+                                <p className="mt-1 text-sm text-red-700">{error}</p>
+                            </div>
+                            <button
+                                onClick={() => {}}
+                                className="flex-shrink-0 text-red-400 transition-colors hover:text-red-600"
+                            >
+                                <span className="sr-only">Đóng</span>
+                                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                        clipRule="evenodd"
+                                    />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
             {/* Stats Header */}
-            <div className="bg-background flex-shrink-0 border-b p-4">
-                <div className="flex flex-wrap items-center gap-3">
-                    <h2 className="text-lg font-semibold">📊 Thống kê bàn</h2>
+            <div className="bg-card/50 flex-shrink-0 border-b p-4">
+                <div className="flex flex-wrap items-center gap-4">
+                    <h2 className="text-foreground flex items-center gap-2 text-lg font-semibold">
+                        <span className="text-xl">📊</span>
+                        Thống kê bàn
+                    </h2>
                     <div className="flex flex-wrap gap-2 text-xs">
-                        <span className="rounded-full bg-blue-100 px-2 py-1 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
+                        <span className="bg-primary/10 text-primary border-primary/20 rounded-full border px-3 py-1 font-medium">
                             Tổng: {tableCount} bàn
                         </span>
-                        {Object.entries(statusStats).map(([status, count]) => (
+                        {getAllStatuses().map(([status, config]) => (
                             <span
                                 key={status}
-                                className={`rounded-full px-2 py-1 ${getStatusInfo(status as Status).color}`}
+                                className={`rounded-full px-3 py-1 font-medium ${config.color}`}
                             >
-                                {getStatusInfo(status as Status).label}: {count}
+                                {config.label}: {statusStats[status as Status] || 0}
                             </span>
                         ))}
                     </div>
@@ -88,34 +108,33 @@ export default function EatInIndex() {
             </div>
 
             {/* Tables Grid */}
-            <div className="flex-1 overflow-y-auto">
-                <div className="p-4">
+            <div className="scrollable-area flex-1 overflow-y-auto">
+                <div className="p-6">
                     {tables.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="text-muted-foreground flex flex-col items-center justify-center py-16 text-center">
                             <div className="mb-4 text-6xl">🪑</div>
-                            <div className="text-muted-foreground mb-2 text-lg font-medium">
-                                Chưa có bàn nào
-                            </div>
-                            <div className="text-muted-foreground text-sm">
+                            <div className="mb-2 text-lg font-medium">Chưa có bàn nào</div>
+                            <div className="text-sm">
                                 Vui lòng thêm bàn trong phần quản lý để bắt đầu
                             </div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
                             {tables.map((table) => (
                                 <Link key={table.id} href={`/order/eat-in/${table.id}`}>
-                                    <Card className="group cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                                        <CardHeader className="pb-3">
+                                    <Card className="group border-border/40 hover:border-primary/20 hover:bg-card/80 cursor-pointer p-1 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                                        <CardHeader className="px-4 pt-4 pb-4">
                                             <div className="flex items-center justify-between">
-                                                <CardTitle className="flex items-center gap-2 text-base">
-                                                    <span className="text-lg">🪑</span>
-                                                    <span className="truncate">{table.name}</span>
+                                                <CardTitle className="flex items-center gap-2 text-base font-semibold">
+                                                    <span className="text-foreground group-hover:text-primary-foreground truncate transition-colors">
+                                                        {table.table_name}
+                                                    </span>
                                                 </CardTitle>
                                                 <StatusBadge status={table.status} />
                                             </div>
                                         </CardHeader>
-                                        <CardContent className="pt-0">
-                                            <div className="text-muted-foreground text-xs">
+                                        <CardContent className="px-4 pt-0 pb-4">
+                                            <div className="text-muted-foreground text-xs font-medium opacity-60 transition-opacity group-hover:opacity-100">
                                                 Nhấn để mở order
                                             </div>
                                         </CardContent>

@@ -6,9 +6,9 @@ export const MENU: MenuItem[] = [
 ]
 
 export const TABLES: Table[] = Array.from({ length: 8 }).map((_, i) => ({
-    id: `t${i + 1}`,
-    name: `Bàn ${i + 1}`,
-    status: 'pending',
+    id: i + 1, // number ID to match backend
+    table_name: `Bàn ${i + 1}`, // use table_name field to match backend
+    status: 'empty', // use backend status values
 }))
 
 export const seedOrders: Order[] = []

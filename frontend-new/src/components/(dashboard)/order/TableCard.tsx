@@ -2,15 +2,16 @@
 import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import StatusBadge from './StatusBadge'
+import type { TableStatus } from '@/lib/types'
 
 export default function TableCard({
     id,
     name,
     status,
 }: {
-    id: string
+    id: number
     name: string
-    status: 'pending' | 'serving' | 'paid'
+    status: TableStatus
 }) {
     return (
         <Link href={`/order/eat-in?page=table&tableId=${id}`}>

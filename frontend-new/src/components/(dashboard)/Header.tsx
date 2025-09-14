@@ -18,7 +18,7 @@ export default function Header({
                     asChild
                     variant="default"
                     size="sm"
-                    className="text-foreground hover:border-accent bg-secondary shrink-0 border px-6 py-1 hover:border hover:bg-[var(--secondary-hover)] hover:shadow-md"
+                    className="text-foreground hover:border-accent hover:bg-card/80 bg-card shrink-0 border px-6 py-1 hover:border hover:shadow-md"
                 >
                     <Link href={backLink}>Trở về</Link>
                 </Button>

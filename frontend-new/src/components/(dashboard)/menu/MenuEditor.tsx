@@ -21,7 +21,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { CirclePlus, List } from 'lucide-react'
+import { CirclePlus, List, Pencil, Trash2 } from 'lucide-react'
 
 interface FormData {
     name: string
@@ -183,7 +183,7 @@ export default function MenuEditor() {
             <Card className="h-fit xl:w-1/3 xl:flex-shrink-0">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-                        <span className="text-2xl">{editing ? '✏️' : <CirclePlus />}</span>
+                        <span className="text-2xl">{editing ? <Pencil /> : <CirclePlus />}</span>
                         {editing ? 'Sửa món' : 'Thêm món'}
                     </CardTitle>
                     {editing && (
@@ -224,13 +224,13 @@ export default function MenuEditor() {
                     </div>
 
                     <Select value={form.category} onValueChange={handleCategoryChange}>
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full cursor-pointer">
                             <SelectValue placeholder="Chọn loại" />
                         </SelectTrigger>
                         <SelectContent>
                             {getFormCategories().map(([key, config]) => (
-                                <SelectItem key={key} value={key}>
-                                    {config.emoji} {config.label}
+                                <SelectItem key={key} value={key} className="cursor-pointer">
+                                    {config.label}
                                 </SelectItem>
                             ))}
                         </SelectContent>
@@ -280,8 +280,7 @@ export default function MenuEditor() {
                                     key={key}
                                     className={`rounded-full px-2 py-1 ${config.color}`}
                                 >
-                                    {config.emoji} {config.label}:{' '}
-                                    {categoryStats[key as Category] || 0}
+                                    {config.label}: {categoryStats[key as Category] || 0}
                                 </span>
                             ))}
                         </div>
@@ -290,20 +289,20 @@ export default function MenuEditor() {
                 <CardContent className="flex min-h-0 flex-1 flex-col p-0">
                     <div className="flex h-fit min-h-0 flex-1 flex-col overflow-hidden rounded-lg border">
                         {/* Fixed Header */}
-                        <div className="bg-muted/20 flex-shrink-0 border-b">
+                        <div className="bg-muted/20 flex-shrink-0 border-b px-2">
                             <UTable>
                                 <TableHeader>
                                     <TableRow className="hover:bg-transparent">
                                         <TableHead className="h-12 font-semibold">
                                             Tên món
                                         </TableHead>
-                                        <TableHead className="h-12 w-24 font-semibold">
+                                        <TableHead className="h-12 w-20 font-semibold">
                                             Loại
                                         </TableHead>
                                         <TableHead className="h-12 w-28 text-right font-semibold">
                                             Giá
                                         </TableHead>
-                                        <TableHead className="h-12 w-36 text-center font-semibold">
+                                        <TableHead className="h-12 w-45 text-center font-semibold">
                                             Thao tác
                                         </TableHead>
                                     </TableRow>
@@ -318,27 +317,22 @@ export default function MenuEditor() {
                                     {menu.map((item) => (
                                         <TableRow
                                             key={item.id}
-                                            className="hover:bg-muted/30 group transition-colors"
+                                            className={`hover:bg-muted/30 group transition-colors ${editing?.id === item.id ? 'text-destructive dark:text-destructive dark:bg-primary/20 text-xs' : ''}`}
                                         >
-                                            <TableCell className="py-3 font-medium">
+                                            <TableCell className={`py-3 font-medium`}>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-lg">
-                                                        {getCategoryInfo(item.category).emoji}
-                                                    </span>
                                                     <span>{item.name}</span>
-                                                    {editing?.id === item.id && (
-                                                        <span className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-800 dark:bg-blue-900/20 dark:text-blue-300">
-                                                            Đang sửa
-                                                        </span>
-                                                    )}
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="text-muted-foreground py-3 text-sm">
+                                            {/* Category */}
+                                            <TableCell className="text-muted-foreground py-3 text-right text-sm">
                                                 {getCategoryInfo(item.category).label}
                                             </TableCell>
+                                            {/* Price */}
                                             <TableCell className="py-3 text-right font-mono font-medium">
-                                                {item.price.toLocaleString()}đ
+                                                {item.price.toLocaleString()}
                                             </TableCell>
+                                            {/* Action */}
                                             <TableCell className="py-3">
                                                 <div className="flex justify-center gap-1 opacity-60 transition-opacity group-hover:opacity-100">
                                                     <Button
@@ -348,7 +342,7 @@ export default function MenuEditor() {
                                                         className="h-7 px-2 text-xs"
                                                         disabled={loading}
                                                     >
-                                                        ✏️
+                                                        <Pencil />
                                                     </Button>
                                                     <Button
                                                         size="sm"
@@ -357,7 +351,7 @@ export default function MenuEditor() {
                                                         className="h-7 px-2 text-xs"
                                                         disabled={loading}
                                                     >
-                                                        🗑️
+                                                        <Trash2 />
                                                     </Button>
                                                 </div>
                                             </TableCell>
@@ -368,7 +362,6 @@ export default function MenuEditor() {
 
                             {menu.length === 0 && (
                                 <div className="text-muted-foreground flex flex-col items-center justify-center py-16">
-                                    <div className="mb-4 text-6xl">🍽️</div>
                                     <div className="mb-2 text-lg font-medium">Menu trống</div>
                                     <div className="text-sm">Thêm món đầu tiên để bắt đầu</div>
                                 </div>
@@ -378,8 +371,8 @@ export default function MenuEditor() {
 
                     {/* Summary */}
                     <div className="text-muted-foreground mt-4 flex flex-shrink-0 items-center justify-center gap-4 text-sm">
-                        <span className="bg-muted/50 rounded-full px-3 py-1.5 font-medium">
-                            📊 Tổng cộng: {menuCount} món
+                        <span className="bg-secondary/20 rounded-full px-3 py-1.5 font-medium">
+                            Tổng cộng: {menuCount} món
                         </span>
                     </div>
                 </CardContent>

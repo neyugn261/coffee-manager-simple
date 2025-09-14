@@ -4,7 +4,7 @@
 
 import { createContext, useContext, useReducer, useCallback, ReactNode } from 'react'
 import apiService from '../../services/apiService.js'
-import type { Table, Status } from '../../lib/types'
+import type { Table, TableStatus } from '../../lib/types'
 
 // State types
 interface TablesState {
@@ -20,7 +20,7 @@ type TablesAction =
     | { type: 'FETCH_ERROR'; payload: string }
     | { type: 'CREATE_SUCCESS'; payload: Table }
     | { type: 'UPDATE_SUCCESS'; payload: Table }
-    | { type: 'DELETE_SUCCESS'; payload: string }
+    | { type: 'DELETE_SUCCESS'; payload: number }
     | { type: 'CLEAR_ERROR' }
 
 // Context type
@@ -29,9 +29,12 @@ interface TablesContextType {
     actions: {
         fetchTables: () => Promise<void>
         createTable: (data: { name: string }) => Promise<void>
-        updateTable: (id: string, data: Partial<{ name: string; status?: Status }>) => Promise<void>
-        deleteTable: (id: string) => Promise<void>
-        updateTableStatus: (id: string, status: Status) => Promise<void>
+        updateTable: (
+            id: number,
+            data: Partial<{ name: string; status?: TableStatus }>,
+        ) => Promise<void>
+        deleteTable: (id: number) => Promise<void>
+        updateTableStatus: (id: number, status: TableStatus) => Promise<void>
         clearError: () => void
     }
 }
@@ -99,9 +102,7 @@ export function TablesProvider({ children }: { children: ReactNode }) {
     const createTable = useCallback(async (data: { name: string }) => {
         dispatch({ type: 'FETCH_START' })
         try {
-            const newTable = await apiService.table.create({
-                table_name: data.name,
-            })
+            const newTable = await apiService.table.create(data)
             dispatch({ type: 'CREATE_SUCCESS', payload: newTable })
         } catch (error) {
             dispatch({
@@ -112,17 +113,17 @@ export function TablesProvider({ children }: { children: ReactNode }) {
     }, [])
 
     const updateTable = useCallback(
-        async (id: string, data: Partial<{ name: string; status?: Status }>) => {
+        async (id: number, data: Partial<{ name: string; status?: TableStatus }>) => {
             dispatch({ type: 'FETCH_START' })
             try {
-                // Since apiService.table doesn't have update method for table name,
-                // we'll just update status if provided
                 if (data.status) {
                     const updatedTable = await apiService.table.updateStatus(id, data.status)
                     dispatch({ type: 'UPDATE_SUCCESS', payload: updatedTable })
+                } else if (data.name) {
+                    const updatedTable = await apiService.table.update(id, { name: data.name })
+                    dispatch({ type: 'UPDATE_SUCCESS', payload: updatedTable })
                 } else {
-                    // For now, we can't update table name through the existing API
-                    throw new Error('Table name update not supported by current API')
+                    throw new Error('No data provided for update')
                 }
             } catch (error) {
                 dispatch({
@@ -134,7 +135,7 @@ export function TablesProvider({ children }: { children: ReactNode }) {
         [],
     )
 
-    const updateTableStatus = useCallback(async (id: string, status: Status) => {
+    const updateTableStatus = useCallback(async (id: number, status: TableStatus) => {
         dispatch({ type: 'FETCH_START' })
         try {
             const updatedTable = await apiService.table.updateStatus(id, status)
@@ -147,13 +148,11 @@ export function TablesProvider({ children }: { children: ReactNode }) {
         }
     }, [])
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const deleteTable = useCallback(async (id: string) => {
+    const deleteTable = useCallback(async (id: number) => {
         dispatch({ type: 'FETCH_START' })
         try {
-            // Note: Table delete is not available in the current API service
-            // This functionality would need to be implemented in the backend first
-            throw new Error('Table deletion not supported by current API')
+            await apiService.table.delete(id)
+            dispatch({ type: 'DELETE_SUCCESS', payload: id })
         } catch (error) {
             dispatch({
                 type: 'FETCH_ERROR',
