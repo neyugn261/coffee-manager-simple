@@ -21,10 +21,6 @@ const getAuthHeaders = () => {
 const apiRequest = async (endpoint, options = {}) => {
     const url = `${API_BASE_URL}${endpoint}`
 
-    console.log('🔄 Making API request to:', url)
-    console.log('🔄 Request method:', options.method || 'GET')
-    console.log('🔄 Request options:', options)
-
     const config = {
         headers: {
             'Content-Type': 'application/json',
@@ -34,14 +30,8 @@ const apiRequest = async (endpoint, options = {}) => {
         ...options,
     }
 
-    console.log('🔄 Final config:', config)
-
     try {
-        console.log('📡 Sending request...')
         const response = await fetch(url, config)
-
-        console.log('📡 Response status:', response.status)
-        console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()))
 
         // Nếu 401 (Unauthorized), chuyển về trang login
         if (response.status === 401) {
@@ -50,7 +40,7 @@ const apiRequest = async (endpoint, options = {}) => {
             window.location.href = '/login'
             return
         }
-
+        
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}))
             console.error('API Error Details:', errorData)

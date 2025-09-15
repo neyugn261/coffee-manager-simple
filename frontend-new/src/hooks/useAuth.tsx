@@ -27,6 +27,8 @@ export function useAuth(): AuthState {
             const expiresDate = new Date(expires)
             const now = new Date()
 
+            console.log('🔍 useAuth: Expiry check - expires:', expiresDate, 'now:', now)
+
             if (expiresDate > now) {
                 setAuthState({ isAuthenticated: true, isLoading: false })
             } else {

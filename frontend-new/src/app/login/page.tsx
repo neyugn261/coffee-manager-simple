@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Image from 'next/image'
+import apiService from '@/services/apiService'  
 
 export default function LoginPage() {
     const [code, setCode] = useState('')
@@ -30,6 +31,8 @@ export default function LoginPage() {
                 // API key hết hạn thì xóa
                 localStorage.removeItem('apiKey')
                 localStorage.removeItem('apiKeyExpires')
+                router.replace('/login')
+                return
             }
         }
     }, [router])
@@ -45,20 +48,19 @@ export default function LoginPage() {
         setError('')
 
         try {
-            const response = await fetch('http://localhost:5000/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ code }),
-            })
+            // const response = await fetch('http://localhost:5000/api/auth/login', {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //     },
+            //     body: JSON.stringify({ code }),
+            // })
 
-            const data = await response.json()
-
-            if (data.success) {
-                // Lưu API key vào localStorage
-                localStorage.setItem('apiKey', data.data.apiKey)
-                localStorage.setItem('apiKeyExpires', data.data.expiresAt)
+            // const data = await response.json()
+            const data = await apiService.auth.login(code)            
+            if (data) {               
+                localStorage.setItem('apiKey', data.apiKey)
+                localStorage.setItem('apiKeyExpires', data.expiresAt)
 
                 console.log('✅ Login thành công, API key đã được lưu')
 
@@ -115,8 +117,8 @@ export default function LoginPage() {
                             {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
                         </Button>
                     </form>
-
-                    <p className="mt-6 text-center text-xs text-stone-500">
+                    
+                    <p className="mt-6 text-center text-xs text-stone-500">                        
                         Vui lòng liên hệ admin để nhận code!
                     </p>
                 </CardContent>
