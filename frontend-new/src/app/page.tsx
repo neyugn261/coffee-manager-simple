@@ -165,7 +165,7 @@ export default function Home(): JSX.Element {
                         onClick={handleLogout}
                         variant="outline"
                         size="sm"
-                        className="bg-card hover:bg-card/80 relative flex w-full flex-col items-start gap-3 overflow-hidden rounded-xl border p-5 text-left transition-all duration-300 hover:-translate-y-1 sm:flex-row sm:items-center sm:gap-4 sm:rounded-2xl"
+                        className="bg-card hover:bg-card/80 relative flex w-full flex-col items-start gap-3 overflow-hidden rounded-xl border p-5 text-left text-wrap transition-all duration-300 hover:-translate-y-1 sm:flex-row sm:items-center sm:gap-4 sm:rounded-2xl"
                     >
                         Logout
                         <LogOut />

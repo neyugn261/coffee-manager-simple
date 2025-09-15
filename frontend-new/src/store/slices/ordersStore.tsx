@@ -132,6 +132,12 @@ export function OrdersProvider({ children }: { children: ReactNode }) {
                         menu_item_id: line.item.id,
                         quantity: line.qty,
                     }))
+
+                    // Chỉ tạo đơn hàng nếu có ít nhất 1 item
+                    if (items.length === 0) {
+                        throw new Error('Đơn hàng phải có ít nhất 1 món')
+                    }
+
                     newOrder = await apiService.order.createTakeaway({
                         items,
                         notes: data.notes,
