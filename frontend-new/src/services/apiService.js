@@ -47,9 +47,9 @@ const apiService = {
             return response.data
         },
 
-        // PUT /api/menu/:id - Cập nhật menu item
+        // PATCH /api/menu/:id - Cập nhật menu item
         update: async (id, data) => {
-            const response = await api.put(`/menu/${id}`, data)
+            const response = await api.patch(`/menu/${id}`, data)
             return response.data
         },
 
@@ -128,14 +128,14 @@ const apiService = {
             return response.data
         },
 
-        // PUT /api/tables/:id - Cập nhật thông tin bàn
+        // PATCH /api/tables/:id - Cập nhật thông tin bàn
         // body: { table_name }
         update: async (id, data) => {
             // Map frontend 'name' to backend 'table_name'
             const backendData = {
                 table_name: data.name || data.table_name,
             }
-            const response = await api.put(`/tables/${id}`, backendData)
+            const response = await api.patch(`/tables/${id}`, backendData)
             return response.data
         },
 
@@ -205,10 +205,10 @@ const apiService = {
             return response.data
         },
 
-        // PUT /api/orders/:id/payment - Cập nhật trạng thái thanh toán (unpaid → paid)
+        // PATCH /api/orders/:id/payment - Cập nhật trạng thái thanh toán (unpaid → paid)
         // body: { payment_status: 'paid' }
         updatePayment: async (id, payment_status = 'paid') => {
-            const response = await api.put(`/orders/${id}/payment`, { payment_status })
+            const response = await api.patch(`/orders/${id}/payment`, { payment_status })
             return response.data
         },
 
@@ -220,7 +220,7 @@ const apiService = {
 
         // ===== DEPRECATED APIs (không còn sử dụng) =====
         // POST /api/orders - REMOVED (sử dụng createTakeaway hoặc createForTable thay thế)
-        // PUT /api/orders/:id/status - REMOVED (chỉ có payment_status)
+        // PATCH /api/orders/:id/status - REMOVED (chỉ có payment_status)
         // GET /api/orders/by-status/:status - REMOVED (chỉ có by-payment)
     },
 

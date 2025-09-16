@@ -66,10 +66,10 @@ export const api = {
             body: JSON.stringify(data),
         }),
 
-    // PUT request
-    put: (endpoint, data) =>
+    // PATCH request
+    patch: (endpoint, data) =>
         apiRequest(endpoint, {
-            method: 'PUT',
+            method: 'PATCH',
             body: JSON.stringify(data),
         }),
 

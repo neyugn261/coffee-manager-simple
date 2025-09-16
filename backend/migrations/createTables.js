@@ -8,7 +8,7 @@ const createTablesSQL = {
       id INT AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(255) NOT NULL,
       price DECIMAL(10,2) NOT NULL,
-      category ENUM('coffee', 'tea', 'juice', 'food', 'other') DEFAULT 'other',
+      category ENUM('yaourt', 'milkTea', 'soda', 'fruitTea', 'topping','latte','food','coffee','milo-cacao','juice','bottleDrink', 'other') DEFAULT 'other',
       image_url VARCHAR(255)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
   `,
@@ -72,16 +72,9 @@ const createTablesSQL = {
 const sampleData = {
     menu_items: `
     INSERT INTO menu_items (id, name, price, category, image_url) VALUES
-    (1, 'Cà phê đen', 15000, 'coffee', 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=400&h=300&fit=crop&crop=center'),
-    (2, 'Cà phê sữa', 20000, 'coffee', 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=300&fit=crop&crop=center'),
-    (3, 'Cappuccino', 35000, 'coffee', 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=400&h=300&fit=crop&crop=center'),
-    (4, 'Latte', 35000, 'coffee', 'https://images.unsplash.com/photo-1561882468-9110e03e0f78?w=400&h=300&fit=crop&crop=center'),
-    (5, 'Trà đào', 25000, 'tea', 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=400&h=300&fit=crop&crop=center'),
-    (6, 'Trà sữa', 30000, 'tea', 'https://images.unsplash.com/photo-1525385133512-2f3bdd039054?w=400&h=300&fit=crop&crop=center'),
-    (7, 'Sinh tố bơ', 35000, 'juice', 'https://images.unsplash.com/photo-1570197788417-0e82375c9371?w=400&h=300&fit=crop&crop=center'),
-    (8, 'Nước ép cam', 25000, 'juice', 'https://images.unsplash.com/photo-1621506289937-a8e4df240d0b?w=400&h=300&fit=crop&crop=center'),
-    (9, 'Bánh croissant', 25000, 'food', 'https://images.unsplash.com/photo-1555507036-ab794f4807ed?w=400&h=300&fit=crop&crop=center'),
-    (10, 'Bánh mì sandwich', 45000, 'food', 'https://images.unsplash.com/photo-1553909489-cd47e0ef937f?w=400&h=300&fit=crop&crop=center')
+    (1, 'Yaour Dâu',  20000, 'yaourt', 'https://beptruong.edu.vn/wp-content/uploads/2015/12/hinh-anh-yaourt-dau-tay-600x500.jpg'),
+    (2, 'Trà sửa không thạch', 12000, 'milktea', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9lpkU4tO9olFPUOTDJSfrovzTXJWcGHAtVg&s'),
+    (3, 'Soda dâu', 15000, 'coffee', 'https://daiichiramen.vn/wp-content/uploads/2023/09/Drink_4.jpg')
     ON DUPLICATE KEY UPDATE
     name = VALUES(name),
     price = VALUES(price),

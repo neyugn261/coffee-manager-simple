@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import { Input } from '@/components/ui/input'      
+        
 import {
     Select,
     SelectContent,
@@ -11,7 +12,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Plus, Edit, Trash2, Search, Filter } from 'lucide-react'
+import { Plus, Edit, Trash2, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
+import apiService from '@/services/apiService'
 
 // Định nghĩa các loại món cố định
 const MENU_CATEGORIES = [
@@ -34,7 +36,7 @@ interface MenuItem {
     name: string
     price: number
     category: string
-    image?: string
+    image_url?: string
 }
 
 export default function MenuManagement() {
@@ -44,13 +46,17 @@ export default function MenuManagement() {
     const [showAddModal, setShowAddModal] = useState(false)
     const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
     const [loading, setLoading] = useState(false)
-    const [showMobileFilter, setShowMobileFilter] = useState(false)
+    
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1)
+    const itemsPerPage = 12 // 12 items mỗi trang (không tính card thêm mới)
 
     // Form state
     const [formData, setFormData] = useState({
         name: '',
         price: '',
         category: 'other',
+        image_url: '',
     })
 
     // Load menu items (mock data for now)
@@ -61,33 +67,10 @@ export default function MenuManagement() {
     const loadMenuItems = async () => {
         setLoading(true)
         try {
-            // Simulate API call - replace with actual API
-            const mockData: MenuItem[] = [
-                {
-                    id: '1',
-                    name: 'Trà sữa truyền thống',
-                    price: 25000,
-                    category: 'milkTea',
-                    image: '/api/placeholder/150/150',
-                },
-                {
-                    id: '2',
-                    name: 'Cà phê đen',
-                    price: 20000,
-                    category: 'coffee',
-                    image: '/api/placeholder/150/150',
-                },
-                {
-                    id: '3',
-                    name: 'Yaourt dâu',
-                    price: 30000,
-                    category: 'yaourt',
-                    image: '/api/placeholder/150/150',
-                },
-                { id: '4', name: 'Nước ép cam', price: 35000, category: 'juice' },
-                { id: '5', name: 'Bánh mì thịt', price: 25000, category: 'food' },
-            ]
-            setMenuItems(mockData)
+            const data = await apiService.menu.getAll()
+            console.log('Menu items from API:', data)
+            setMenuItems(data)            
+            
         } catch (error) {
             console.error('Error loading menu items:', error)
         } finally {
@@ -102,6 +85,17 @@ export default function MenuManagement() {
         return matchesSearch && matchesCategory
     })
 
+    // Pagination logic
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage)
+    const startIndex = (currentPage - 1) * itemsPerPage
+    const endIndex = startIndex + itemsPerPage
+    const currentItems = filteredItems.slice(startIndex, endIndex)
+
+    // Reset to page 1 when filter changes
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [searchTerm, selectedCategory])
+
     // Handle form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -111,14 +105,24 @@ export default function MenuManagement() {
                 name: formData.name,
                 price: parseInt(formData.price),
                 category: formData.category,
+                image_url: formData.image_url || undefined,
             }
 
             if (editingItem) {
+                await apiService.menu.update(editingItem.id, {
+                    ...newItem
+                })
                 setMenuItems((prev) =>
                     prev.map((item) => (item.id === editingItem.id ? newItem : item)),
                 )
             } else {
-                setMenuItems((prev) => [...prev, newItem])
+                const created = await apiService.menu.create({
+                    name: formData.name,
+                    price: parseInt(formData.price),
+                    category: formData.category,
+                    image_url: formData.image_url || undefined,
+                })
+                setMenuItems((prev) => [...prev, created])
             }
 
             resetForm()
@@ -128,7 +132,7 @@ export default function MenuManagement() {
     }
 
     const resetForm = () => {
-        setFormData({ name: '', price: '', category: 'other' })
+        setFormData({ name: '', price: '', category: 'other' , image_url: ''})
         setShowAddModal(false)
         setEditingItem(null)
     }
@@ -139,6 +143,7 @@ export default function MenuManagement() {
             name: item.name,
             price: item.price.toString(),
             category: item.category,
+            image_url: item.image_url || '',
         })
         setShowAddModal(true)
     }
@@ -164,9 +169,9 @@ export default function MenuManagement() {
     return (
         <div className="space-y-6">
             {/* Search and Filter Bar */}
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex gap-3 items-center">
                 {/* Search Box */}
-                <div className="relative max-w-md flex-1">
+                <div className="relative flex-1">
                     <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
                     <Input
                         placeholder="Tìm kiếm món..."
@@ -193,23 +198,11 @@ export default function MenuManagement() {
                     </Select>
                 </div>
 
-                {/* Mobile Filter Button */}
-                <Button
-                    variant="outline"
-                    onClick={() => setShowMobileFilter(!showMobileFilter)}
-                    className="sm:hidden"
-                >
-                    <Filter className="h-4 w-4" />
-                    Lọc
-                </Button>
-            </div>
-
-            {/* Mobile Filter Dropdown */}
-            {showMobileFilter && (
+                {/* Mobile Category Filter */}
                 <div className="sm:hidden">
                     <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Chọn loại" />
+                        <SelectTrigger className="w-12 h-10 p-0 justify-center">
+                            <Filter className="h-4 w-4" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">📋 Tất cả</SelectItem>
@@ -221,7 +214,7 @@ export default function MenuManagement() {
                         </SelectContent>
                     </Select>
                 </div>
-            )}
+            </div>
 
             {/* Menu Items Grid */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
@@ -246,11 +239,11 @@ export default function MenuManagement() {
                     >
                         {/* Image */}
                         <div className="bg-muted aspect-square overflow-hidden">
-                            {item.image ? (
+                            {item.image_url ? (
                                 <img
-                                    src={item.image}
+                                    src={item.image_url}
                                     alt={item.name}
-                                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                                    className="h-full w-full object-cover object-center transition-transform group-hover:scale-105"
                                 />
                             ) : (
                                 <div className="text-muted-foreground flex h-full items-center justify-center">
@@ -266,17 +259,13 @@ export default function MenuManagement() {
 
                         {/* Content */}
                         <div className="p-4">
-                            <div className="mb-2 flex items-center justify-between">
+                            <div className="mb-4 flex items-center justify-between">
                                 <h3 className="text-foreground line-clamp-1 font-semibold">
                                     {item.name}
                                 </h3>
                                 <span className="text-primary text-sm font-bold">
                                     {formatPrice(item.price)}
                                 </span>
-                            </div>
-
-                            <div className="text-muted-foreground mb-3 text-xs">
-                                {getCategoryLabel(item.category)}
                             </div>
 
                             {/* Action Buttons */}
@@ -302,6 +291,42 @@ export default function MenuManagement() {
                     </div>
                 ))}
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="flex items-center gap-2"
+                    >
+                        <ChevronLeft className="h-4 w-4" />
+                        Trước
+                    </Button>
+                    
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                            Trang {currentPage} / {totalPages}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                            ({filteredItems.length} món)
+                        </span>
+                    </div>
+                    
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="flex items-center gap-2"
+                    >
+                        Sau
+                        <ChevronRight className="h-4 w-4" />
+                    </Button>
+                </div>
+            )}
 
             {/* Add/Edit Modal */}
             <Dialog open={showAddModal} onOpenChange={resetForm}>
@@ -335,8 +360,18 @@ export default function MenuManagement() {
                                 placeholder="0"
                                 min="0"
                             />
+                        </div>  
+                        <div>
+                            <label className="text-sm font-medium">Image URL</label>
+                            <Input
+                                type="text"
+                                value={formData.image_url || ''}
+                                onChange={(e) =>
+                                    setFormData((prev) => ({ ...prev, image_url: e.target.value }))
+                                }
+                                placeholder="Nhập URL ảnh..."
+                            />
                         </div>
-
                         <div>
                             <label className="text-sm font-medium">Loại *</label>
                             <Select
