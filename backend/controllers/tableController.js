@@ -31,7 +31,7 @@ class TableController {
         }
     }
 
-    // PATCH /api/tables - Tạo bàn mới
+    // POST /api/tables - Tạo bàn mới
     async createTable(req, res) {
         try {          
             const table = await tableService.createTable(req.body);
@@ -46,7 +46,23 @@ class TableController {
         }
     }
 
-    // PUT /api/tables/:id/status - Cập nhật trạng thái bàn
+    // PATCH /api/tables/:id - Cập nhật thông tin bàn
+    async updateTable(req, res) {
+        try {
+            const { id } = req.params;
+            const updates = req.body;
+            const table = await tableService.updateTable(parseInt(id), updates);
+            res.json({
+                success: true,
+                data: table,
+                message: 'Cập nhật thông tin bàn thành công'
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // PATCH /api/tables/:id/status - Cập nhật trạng thái bàn
     async updateTableStatus(req, res) {
         try {
             const { id } = req.params;

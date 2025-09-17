@@ -83,6 +83,25 @@ class TableRepository {
         }
     }
 
+    // Cập nhật thông tin bàn
+    async updateTable(id, updates) {
+        const connection = await pool.getConnection();
+        try {
+            const fields = [];
+            const values = [];
+            for (const [key, value] of Object.entries(updates)) {
+                fields.push(`${key} = ?`);
+                values.push(value);
+            }
+            values.push(id);
+            const sql = `UPDATE tables SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`;
+            await connection.execute(sql, values);
+            return await this.getTableById(id);
+        } finally {
+            connection.release();
+        }
+    }
+
     // Cập nhật trạng thái bàn
     async updateTableStatus(id, status) {
         const connection = await pool.getConnection();

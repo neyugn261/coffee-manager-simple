@@ -54,6 +54,35 @@ class TableService {
         }
     }
 
+    // Cập nhật thông tin bàn
+    async updateTable(id, updates) {
+        if (!id || isNaN(id)) {
+            throw createError('Invalid table ID', 400);
+        }
+        if (updates.table_name !== undefined && !updates.table_name) {
+            throw createError('Table name cannot be empty', 400);
+        }
+        try {
+            const table = await tableRepository.getTableById(id);
+            if (!table) {
+                throw createError('Table not found', 404);
+            }
+            // Nếu cập nhật tên bàn, kiểm tra trùng tên
+            if (updates.table_name && updates.table_name !== table.table_name) {
+                const existingTable = await tableRepository.getTableByName(updates.table_name);
+                if (existingTable) {
+                    throw createError('Table name already exists', 409);
+                }
+            }
+            return await tableRepository.updateTable(id, updates);
+        } catch (error) {
+            if (error.status === 404 || error.status === 409) {
+                throw error; // Rethrow lỗi không tìm thấy hoặc trùng tên
+            }
+            throw createError(`Error updating table: ${error.message}`, 500);
+        }
+    }
+
     // Cập nhật trạng thái bàn
     async updateTableStatus(id, status) {
         if (!id || isNaN(id)) {
