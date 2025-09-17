@@ -7,7 +7,6 @@ import CartDrawer from '@/components/(dashboard)/order/CartDrawer'
 import MenuCard from '@/components/(dashboard)/order/MenuCard'
 import SearchFilter from '@/components/(dashboard)/order/SearchFilter'
 import { useMenu, useOrders } from '@/store'
-import { saveOrderToApi } from '@/lib/utils'
 import type { Category, MenuItem } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 

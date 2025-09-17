@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Image from 'next/image'
-import apiService from '@/services/apiService'  
+import apiService from '@/services/apiService'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCoffee, faInfoCircle } from '@fortawesome/free-solid-svg-icons'
 
@@ -50,17 +50,9 @@ export default function LoginPage() {
         setError('')
 
         try {
-            // const response = await fetch('http://localhost:5000/api/auth/login', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json',
-            //     },
-            //     body: JSON.stringify({ code }),
-            // })
+            const data = await apiService.auth.login(code)
 
-            // const data = await response.json()
-            const data = await apiService.auth.login(code)            
-            if (data) {               
+            if (data && data.apiKey) {
                 localStorage.setItem('apiKey', data.apiKey)
                 localStorage.setItem('apiKeyExpires', data.expiresAt)
 
@@ -69,11 +61,15 @@ export default function LoginPage() {
                 // Redirect về home
                 router.replace('/')
             } else {
-                setError(data.message || 'Đăng nhập thất bại')
+                setError('Đăng nhập thất bại - Mã code không hợp lệ')
             }
         } catch (error) {
             console.error('Login failed:', error)
-            setError('Lỗi kết nối server')
+            if (error instanceof Error) {
+                setError(error.message || 'Lỗi kết nối server')
+            } else {
+                setError('Lỗi kết nối server')
+            }
         } finally {
             setLoading(false)
         }

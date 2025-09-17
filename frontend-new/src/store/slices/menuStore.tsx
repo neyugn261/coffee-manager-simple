@@ -3,7 +3,7 @@
  */
 
 import { createContext, useContext, useReducer, useCallback, ReactNode } from 'react'
-import apiService from '../../services/apiService.js'
+import apiService from '../../services/apiService'
 import type { MenuItem, Category } from '../../lib/types'
 
 // State types

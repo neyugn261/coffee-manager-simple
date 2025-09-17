@@ -1,4 +1,4 @@
-import { api } from './api.js'
+import { api } from './api'
 
 /**
  * ===============================================
@@ -9,6 +9,65 @@ import { api } from './api.js'
  * ===============================================
  */
 
+// Types for API service (reusing from api.ts)
+interface MenuItem {
+    id: number
+    name: string
+    price: number
+    category: 'coffee' | 'tea' | 'juice' | 'food' | 'other'
+    image_url?: string
+    created_at?: string
+    updated_at?: string
+}
+
+interface Table {
+    id: number
+    table_name: string
+    status: 'empty' | 'occupied'
+    role: 'HOST' | 'CHILD' | 'NORMAL'
+    is_merged: boolean
+    host_id?: number | null
+    merged_tables?: number[] | null
+    created_at: string
+    updated_at: string
+}
+
+interface OrderItem {
+    menu_item_id: number
+    quantity: number
+}
+
+interface Order {
+    id: number
+    table_id?: number
+    customer_name?: string | null
+    order_type: 'takeaway' | 'dine_in'
+    payment_status: 'unpaid' | 'paid'
+    total: number
+    notes?: string | null
+    created_at: string
+    paid_at?: string | null
+    items: OrderItem[]
+}
+
+interface CreateMenuItemData {
+    name: string
+    price: number
+    category?: 'coffee' | 'tea' | 'juice' | 'food' | 'other'
+    image_url?: string
+}
+
+interface CreateTableData {
+    name?: string
+    table_name?: string
+}
+
+interface CreateOrderData {
+    items: OrderItem[]
+    customer_name?: string
+    notes?: string
+}
+
 const apiService = {
     /**
      * ===============================================
@@ -18,16 +77,16 @@ const apiService = {
      */
     menu: {
         // GET /api/menu - Lấy tất cả menu items
-        getAll: async () => {
+        getAll: async (): Promise<MenuItem[]> => {
             try {
                 console.log('🍽️ Fetching menu items...')
-                const response = await api.get('/menu')
+                const response = await api.menu.getAll()
                 console.log('🍽️ Menu response:', response)
                 return response.data || [] // Backend trả về {status, data, count}
             } catch (error) {
                 console.error('🍽️ Menu getAll failed:', error)
-                // Nếu là lỗi authentication, không cần throw lại vì api.js đã handle
-                if (error.message && error.message.includes('401')) {
+                // Nếu là lỗi authentication, không cần throw lại vì api.ts đã handle
+                if (error instanceof Error && error.message && error.message.includes('401')) {
                     return [] // Return empty array để tránh crash UI
                 }
                 throw error
@@ -35,28 +94,27 @@ const apiService = {
         },
 
         // GET /api/menu/:id - Lấy menu item theo ID
-        getById: async (id) => {
-            const response = await api.get(`/menu/${id}`)
+        getById: async (id: number): Promise<MenuItem> => {
+            const response = await api.menu.getById(id)
             return response.data
         },
 
         // POST /api/menu - Tạo menu item mới
         // body: { name, price, category, image_url }
-        create: async (data) => {
-            const response = await api.post('/menu', data)
+        create: async (data: CreateMenuItemData): Promise<MenuItem> => {
+            const response = await api.menu.create(data)
             return response.data
         },
 
         // PATCH /api/menu/:id - Cập nhật menu item
-        update: async (id, data) => {
-            const response = await api.patch(`/menu/${id}`, data)
+        update: async (id: number, data: Partial<CreateMenuItemData>): Promise<MenuItem> => {
+            const response = await api.menu.update(id, data)
             return response.data
         },
 
         // DELETE /api/menu/:id - Xóa menu item
-        delete: async (id) => {
-            const response = await api.delete(`/menu/${id}`)
-            return response
+        delete: async (id: number): Promise<void> => {
+            await api.menu.delete(id)
         },
     },
 
@@ -68,81 +126,80 @@ const apiService = {
      */
     table: {
         // GET /api/tables - Lấy tất cả bàn (dùng cho grid Tables)
-        getAll: async () => {
-            const response = await api.get('/tables')
+        getAll: async (): Promise<Table[]> => {
+            const response = await api.tables.getAll()
             return response.data || []
         },
 
         // GET /api/tables/available - Lấy bàn trống
-        getAvailable: async () => {
-            const response = await api.get('/tables/available')
+        getAvailable: async (): Promise<Table[]> => {
+            const response = await api.tables.getAvailable()
             return response.data || []
         },
 
         // GET /api/tables/:id - Lấy bàn theo ID
-        getById: async (id) => {
-            const response = await api.get(`/tables/${id}`)
+        getById: async (id: number): Promise<Table> => {
+            const response = await api.tables.getById(id)
             return response.data
         },
 
         // POST /api/tables - Tạo bàn mới
         // body: { table_name }
-        create: async (data) => {
+        create: async (data: CreateTableData): Promise<Table> => {
             // Map frontend 'name' to backend 'table_name'
             const backendData = {
-                table_name: data.name || data.table_name,
+                table_name: data.name || data.table_name || '',
             }
-            const response = await api.post('/tables', backendData)
+            const response = await api.tables.create(backendData)
             return response.data
         },
 
         // POST /api/tables/merge - Gộp bàn
         // body: { hostId, tableIds: [2,3,4] }
-        merge: async (hostId, tableIds) => {
-            const response = await api.post('/tables/merge', { hostId, tableIds })
+        merge: async (hostId: number, tableIds: number[]): Promise<Table> => {
+            const response = await api.tables.merge({ hostId, tableIds })
             return response.data
         },
 
         // POST /api/tables/:id/split - Tách bàn đã gộp
-        split: async (hostId) => {
-            const response = await api.post(`/tables/${hostId}/split`)
+        split: async (hostId: number): Promise<Table> => {
+            const response = await api.tables.split(hostId)
             return response.data
         },
 
         // POST /api/tables/:id/occupy - Đặt bàn (empty → occupied)
-        occupy: async (id) => {
-            const response = await api.post(`/tables/${id}/occupy`)
+        occupy: async (id: number): Promise<Table> => {
+            const response = await api.tables.occupy(id)
             return response.data
         },
 
         // POST /api/tables/:id/checkout - Checkout bàn (occupied → empty)
-        checkout: async (id) => {
-            const response = await api.post(`/tables/${id}/checkout`)
+        checkout: async (id: number): Promise<Table> => {
+            const response = await api.tables.checkout(id)
             return response.data
         },
 
         // PATCH /api/tables/:id/status - Cập nhật trạng thái bàn
         // body: { status: 'empty'|'occupied' }
-        updateStatus: async (id, status) => {
-            const response = await api.patch(`/tables/${id}/status`, { status })
+        updateStatus: async (id: number, status: 'empty' | 'occupied'): Promise<Table> => {
+            const response = await api.tables.updateStatus(id, { status })
             return response.data
         },
 
         // PATCH /api/tables/:id - Cập nhật thông tin bàn
         // body: { table_name }
-        update: async (id, data) => {
+        update: async (id: number, data: CreateTableData): Promise<Table> => {
             // Map frontend 'name' to backend 'table_name'
             const backendData = {
-                table_name: data.name || data.table_name,
+                table_name: data.name || data.table_name || '',
             }
-            const response = await api.patch(`/tables/${id}`, backendData)
+            const response = await api.tables.update(id, backendData)
             return response.data
         },
 
         // DELETE /api/tables/:id - Xóa bàn
-        delete: async (id) => {
-            const response = await api.delete(`/tables/${id}`)
-            return response
+        delete: async (id: number): Promise<void> => {
+            await api.tables.delete(id)
         },
     },
 
@@ -155,67 +212,65 @@ const apiService = {
      */
     order: {
         // GET /api/orders - Lấy tất cả đơn hàng
-        getAll: async () => {
-            const response = await api.get('/orders')
+        getAll: async (): Promise<Order[]> => {
+            const response = await api.orders.getAll()
             return response.data || []
         },
 
         // GET /api/orders/:id - Lấy đơn hàng theo ID
-        getById: async (id) => {
-            const response = await api.get(`/orders/${id}`)
+        getById: async (id: number): Promise<Order> => {
+            const response = await api.orders.getById(id)
             return response.data
         },
 
         // GET /api/orders/statistics - Lấy thống kê đơn hàng (cho dashboard)
-        getStatistics: async () => {
-            const response = await api.get('/orders/statistics')
-            return response.data
+        getStatistics: async (): Promise<Record<string, number>> => {
+            return await api.orders.getStatistics()
         },
 
         // GET /api/orders/by-payment/:payment_status - Lấy theo trạng thái thanh toán
         // payment_status: 'unpaid' | 'paid'
-        getByPaymentStatus: async (payment_status) => {
-            const response = await api.get(`/orders/by-payment/${payment_status}`)
+        getByPaymentStatus: async (payment_status: 'unpaid' | 'paid'): Promise<Order[]> => {
+            const response = await api.orders.getByPaymentStatus(payment_status)
             return response.data || []
         },
 
         // GET /api/orders/takeaway - Lấy đơn hàng mang đi
-        getTakeaway: async () => {
-            const response = await api.get('/orders/takeaway')
+        getTakeaway: async (): Promise<Order[]> => {
+            const response = await api.orders.getTakeaway()
             return response.data || []
         },
 
         // GET /api/orders/table/:tableId - Lấy orders của bàn (dùng cho /tables/:id)
-        getByTable: async (tableId) => {
-            const response = await api.get(`/orders/table/${tableId}`)
+        getByTable: async (tableId: number): Promise<Order[]> => {
+            const response = await api.orders.getByTable(tableId)
             return response.data || []
         },
 
         // POST /api/orders/takeaway - Tạo đơn hàng mang đi
         // body: { items: [{ menu_item_id, quantity }], customer_name?, notes? }
-        createTakeaway: async (data) => {
-            const response = await api.post('/orders/takeaway', data)
+        createTakeaway: async (data: CreateOrderData): Promise<Order> => {
+            const response = await api.orders.createTakeaway(data)
             return response.data
         },
 
         // POST /api/orders/table/:tableId - Tạo đơn hàng cho bàn
         // body: { items: [{ menu_item_id, quantity }], customer_name?, notes? }
-        createForTable: async (tableId, data) => {
-            const response = await api.post(`/orders/table/${tableId}`, data)
+        createForTable: async (tableId: number, data: CreateOrderData): Promise<Order> => {
+            const response = await api.orders.createForTable(tableId, data)
             return response.data
         },
 
         // PATCH /api/orders/:id/payment - Cập nhật trạng thái thanh toán (unpaid → paid)
         // body: { payment_status: 'paid' }
-        updatePayment: async (id, payment_status = 'paid') => {
-            const response = await api.patch(`/orders/${id}/payment`, { payment_status })
+        updatePayment: async (id: number, payment_status: 'paid' = 'paid'): Promise<Order> => {
+            const response = await api.orders.updatePayment(id, { payment_status })
             return response.data
         },
 
         // DELETE /api/orders/:id - Xóa đơn hàng
-        delete: async (id) => {
-            const response = await api.delete(`/orders/${id}`)
-            return response
+        delete: async (id: number): Promise<void> => {
+            await api.orders.delete(id)
         },
 
         // ===== DEPRECATED APIs (không còn sử dụng) =====
@@ -233,8 +288,8 @@ const apiService = {
     auth: {
         // POST /api/auth/login - Đăng nhập bằng code
         // body: { code }
-        login: async (code) => {
-            const response = await api.post('/auth/login', { code })
+        login: async (code: string): Promise<{ apiKey: string; expiresAt: string }> => {
+            const response = await api.auth.login({ code })
             return response.data
         },
     },
@@ -247,20 +302,22 @@ const apiService = {
  */
 export const apiHelpers = {
     // Format order items từ form data
-    formatOrderItems(items) {
+    formatOrderItems(
+        items: Array<{ id?: number; menu_item_id?: number; quantity?: number }>,
+    ): OrderItem[] {
         return items.map((item) => ({
-            menu_item_id: item.id || item.menu_item_id,
+            menu_item_id: item.id || item.menu_item_id || 0,
             quantity: item.quantity || 1,
         }))
     },
 
     // Check if table has unpaid orders
-    hasUnpaidOrders(orders) {
+    hasUnpaidOrders(orders: Order[]): boolean {
         return orders && orders.some((order) => order.payment_status === 'unpaid')
     },
 
     // Calculate total from order items
-    calculateTotal(items, menuItems) {
+    calculateTotal(items: OrderItem[], menuItems: MenuItem[]): number {
         return items.reduce((total, item) => {
             const menuItem = menuItems.find((m) => m.id === item.menu_item_id)
             return total + (menuItem ? menuItem.price * item.quantity : 0)
@@ -268,18 +325,11 @@ export const apiHelpers = {
     },
 
     // Format table display name
-    formatTableName(table) {
+    formatTableName(table: Table): string {
         if (table.is_merged && table.role === 'HOST') {
             return `${table.table_name} (Gộp ${table.merged_tables?.length || 0} bàn)`
         }
         return table.table_name
-    },
-
-    // Get table status color for UI
-    getTableStatusColor(table, orders = []) {
-        if (table.status === 'empty') return 'green'
-        if (apiHelpers.hasUnpaidOrders(orders)) return 'red'
-        return 'blue' // occupied but paid
     },
 }
 
