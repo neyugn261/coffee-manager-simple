@@ -19,6 +19,7 @@ router.post("/:id/occupy", tableController.occupyTable);         // Đặt bàn
 router.post("/:id/checkout", tableController.checkoutTable);     // Checkout bàn
 
 router.patch("/:id/status", tableController.updateTableStatus);    // Cập nhật trạng thái
+router.patch("/:id", tableController.updateTable);                // Cập nhật thông tin bàn
 
 router.delete("/:id", tableController.deleteTable);              // Xóa bàn
 

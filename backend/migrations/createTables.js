@@ -87,11 +87,7 @@ const sampleData = {
     (1, 'Bàn 01', 'empty'),
     (2, 'Bàn 02', 'empty'),
     (3, 'Bàn 03', 'empty'),
-    (4, 'Bàn 04', 'empty'),
-    (5, 'Bàn VIP 01', 'empty'),
-    (6, 'Bàn VIP 02', 'empty'),
-    (7, 'Bàn Góc', 'empty'),
-    (8, 'Bàn Ngoài Trời', 'empty')
+    (4, 'Bàn 04', 'empty'),    
     ON DUPLICATE KEY UPDATE
     table_name = VALUES(table_name),
     status = VALUES(status);

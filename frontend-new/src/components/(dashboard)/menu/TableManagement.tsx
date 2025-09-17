@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Plus, Edit, Trash2 } from 'lucide-react'
-
+import apiService from '@/services/apiService'
 interface Table {
     id: string
-    name: string
+    table_name: string
 }
 
 export default function TableManagement() {
@@ -28,15 +28,8 @@ export default function TableManagement() {
     const loadTables = async () => {
         setLoading(true)
         try {
-            // Simulate API call - replace with actual API
-            const mockData: Table[] = [
-                { id: '1', name: 'Bàn 1' },
-                { id: '2', name: 'Bàn 2' },
-                { id: '3', name: 'Bàn 3' },
-                { id: '4', name: 'Bàn VIP' },
-                { id: '5', name: 'Bàn ngoài trời' },
-            ]
-            setTables(mockData)
+            const data = await apiService.table.getAll()
+            setTables(data)
         } catch (error) {
             console.error('Error loading tables:', error)
         } finally {
@@ -52,14 +45,20 @@ export default function TableManagement() {
         try {
             const newTable: Table = {
                 id: editingTable?.id || Date.now().toString(),
-                name: tableName.trim(),
+                table_name: tableName.trim(),
             }
 
             if (editingTable) {
+                await apiService.table.update(editingTable.id, {
+                    ...newTable,
+                })
                 setTables((prev) =>
                     prev.map((table) => (table.id === editingTable.id ? newTable : table)),
                 )
             } else {
+                await apiService.table.create({
+                    table_name: newTable.table_name,
+                })
                 setTables((prev) => [...prev, newTable])
             }
 
@@ -77,7 +76,7 @@ export default function TableManagement() {
 
     const handleEdit = (table: Table) => {
         setEditingTable(table)
-        setTableName(table.name)
+        setTableName(table.table_name)
         setShowAddModal(true)
     }
 
@@ -119,7 +118,9 @@ export default function TableManagement() {
                                     🪑
                                 </div>
                                 <div>
-                                    <h3 className="text-foreground font-semibold">{table.name}</h3>
+                                    <h3 className="text-foreground font-semibold">
+                                        {table.table_name}
+                                    </h3>
                                     <p className="text-muted-foreground text-sm">Trống</p>
                                 </div>
                             </div>
@@ -165,20 +166,25 @@ export default function TableManagement() {
 
             {/* Add/Edit Modal */}
             <Dialog open={showAddModal} onOpenChange={resetForm}>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="bg-popover border-border shadow-2xl sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{editingTable ? 'Chỉnh sửa bàn' : 'Thêm bàn mới'}</DialogTitle>
+                        <DialogTitle className="text-popover-foreground">
+                            {editingTable ? 'Chỉnh sửa bàn' : 'Thêm bàn mới'}
+                        </DialogTitle>
                     </DialogHeader>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="text-sm font-medium">Tên bàn *</label>
+                            <label className="text-popover-foreground text-sm font-medium">
+                                Tên bàn *
+                            </label>
                             <Input
                                 required
                                 value={tableName}
                                 onChange={(e) => setTableName(e.target.value)}
                                 placeholder="Nhập tên bàn..."
                                 autoFocus
+                                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
                             />
                         </div>
 
@@ -187,11 +193,14 @@ export default function TableManagement() {
                                 type="button"
                                 variant="outline"
                                 onClick={resetForm}
-                                className="flex-1"
+                                className="bg-secondary text-secondary-foreground border-border hover:bg-secondary/80 flex-1"
                             >
                                 Hủy
                             </Button>
-                            <Button type="submit" className="flex-1">
+                            <Button
+                                type="submit"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1"
+                            >
                                 {editingTable ? 'Cập nhật' : 'Thêm'}
                             </Button>
                         </div>

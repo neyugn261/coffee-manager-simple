@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'      
-        
+import { Input } from '@/components/ui/input'
+
 import {
     Select,
     SelectContent,
@@ -46,7 +46,7 @@ export default function MenuManagement() {
     const [showAddModal, setShowAddModal] = useState(false)
     const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
     const [loading, setLoading] = useState(false)
-    
+
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1)
     const itemsPerPage = 12 // 12 items mỗi trang (không tính card thêm mới)
@@ -69,8 +69,7 @@ export default function MenuManagement() {
         try {
             const data = await apiService.menu.getAll()
             console.log('Menu items from API:', data)
-            setMenuItems(data)            
-            
+            setMenuItems(data)
         } catch (error) {
             console.error('Error loading menu items:', error)
         } finally {
@@ -110,17 +109,17 @@ export default function MenuManagement() {
 
             if (editingItem) {
                 await apiService.menu.update(editingItem.id, {
-                    ...newItem
+                    ...newItem,
                 })
                 setMenuItems((prev) =>
                     prev.map((item) => (item.id === editingItem.id ? newItem : item)),
                 )
             } else {
                 const created = await apiService.menu.create({
-                    name: formData.name,
-                    price: parseInt(formData.price),
-                    category: formData.category,
-                    image_url: formData.image_url || undefined,
+                    name: newItem.name,
+                    price: newItem.price,
+                    category: newItem.category,
+                    image_url: newItem.image_url,
                 })
                 setMenuItems((prev) => [...prev, created])
             }
@@ -132,7 +131,7 @@ export default function MenuManagement() {
     }
 
     const resetForm = () => {
-        setFormData({ name: '', price: '', category: 'other' , image_url: ''})
+        setFormData({ name: '', price: '', category: 'other', image_url: '' })
         setShowAddModal(false)
         setEditingItem(null)
     }
@@ -169,7 +168,7 @@ export default function MenuManagement() {
     return (
         <div className="space-y-6">
             {/* Search and Filter Bar */}
-            <div className="flex gap-3 items-center">
+            <div className="flex items-center gap-3">
                 {/* Search Box */}
                 <div className="relative flex-1">
                     <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -201,7 +200,7 @@ export default function MenuManagement() {
                 {/* Mobile Category Filter */}
                 <div className="sm:hidden">
                     <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger className="w-12 h-10 p-0 justify-center">
+                        <SelectTrigger className="h-10 w-12 justify-center p-0">
                             <Filter className="h-4 w-4" />
                         </SelectTrigger>
                         <SelectContent>
@@ -298,27 +297,27 @@ export default function MenuManagement() {
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                         disabled={currentPage === 1}
                         className="flex items-center gap-2"
                     >
                         <ChevronLeft className="h-4 w-4" />
                         Trước
                     </Button>
-                    
+
                     <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-muted-foreground text-sm">
                             Trang {currentPage} / {totalPages}
                         </span>
-                        <span className="text-sm text-muted-foreground">
+                        <span className="text-muted-foreground text-sm">
                             ({filteredItems.length} món)
                         </span>
                     </div>
-                    
+
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}
                         className="flex items-center gap-2"
                     >
@@ -330,14 +329,18 @@ export default function MenuManagement() {
 
             {/* Add/Edit Modal */}
             <Dialog open={showAddModal} onOpenChange={resetForm}>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="bg-popover border-border shadow-2xl sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{editingItem ? 'Chỉnh sửa món' : 'Thêm món mới'}</DialogTitle>
+                        <DialogTitle className="text-popover-foreground">
+                            {editingItem ? 'Chỉnh sửa món' : 'Thêm món mới'}
+                        </DialogTitle>
                     </DialogHeader>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="text-sm font-medium">Tên món *</label>
+                            <label className="text-popover-foreground text-sm font-medium">
+                                Tên món *
+                            </label>
                             <Input
                                 required
                                 value={formData.name}
@@ -345,11 +348,14 @@ export default function MenuManagement() {
                                     setFormData((prev) => ({ ...prev, name: e.target.value }))
                                 }
                                 placeholder="Nhập tên món..."
+                                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
                             />
                         </div>
 
                         <div>
-                            <label className="text-sm font-medium">Giá *</label>
+                            <label className="text-popover-foreground text-sm font-medium">
+                                Giá *
+                            </label>
                             <Input
                                 type="number"
                                 required
@@ -359,10 +365,13 @@ export default function MenuManagement() {
                                 }
                                 placeholder="0"
                                 min="0"
+                                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
                             />
-                        </div>  
+                        </div>
                         <div>
-                            <label className="text-sm font-medium">Image URL</label>
+                            <label className="text-popover-foreground text-sm font-medium">
+                                Image URL
+                            </label>
                             <Input
                                 type="text"
                                 value={formData.image_url || ''}
@@ -370,22 +379,29 @@ export default function MenuManagement() {
                                     setFormData((prev) => ({ ...prev, image_url: e.target.value }))
                                 }
                                 placeholder="Nhập URL ảnh..."
+                                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
                             />
                         </div>
                         <div>
-                            <label className="text-sm font-medium">Loại *</label>
+                            <label className="text-popover-foreground text-sm font-medium">
+                                Loại *
+                            </label>
                             <Select
                                 value={formData.category}
                                 onValueChange={(value) =>
                                     setFormData((prev) => ({ ...prev, category: value }))
                                 }
                             >
-                                <SelectTrigger>
+                                <SelectTrigger className="bg-input border-border text-foreground">
                                     <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent>
+                                <SelectContent className="bg-popover border-border">
                                     {MENU_CATEGORIES.map((category) => (
-                                        <SelectItem key={category.value} value={category.value}>
+                                        <SelectItem
+                                            key={category.value}
+                                            value={category.value}
+                                            className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
+                                        >
                                             {category.label}
                                         </SelectItem>
                                     ))}
@@ -398,11 +414,14 @@ export default function MenuManagement() {
                                 type="button"
                                 variant="outline"
                                 onClick={resetForm}
-                                className="flex-1"
+                                className="bg-secondary text-secondary-foreground border-border hover:bg-secondary/80 flex-1"
                             >
                                 Hủy
                             </Button>
-                            <Button type="submit" className="flex-1">
+                            <Button
+                                type="submit"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1"
+                            >
                                 {editingItem ? 'Cập nhật' : 'Thêm'}
                             </Button>
                         </div>
