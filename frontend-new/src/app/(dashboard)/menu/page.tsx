@@ -9,12 +9,12 @@ export default function MenuPage() {
     const [activeTab, setActiveTab] = useState<'menu' | 'tables'>('menu')
 
     return (
-        <>
+        <div className="h-full w-full">
             <Header title="Quản lý Menu & Bàn" backLink="/" />
-            <div className="bg-background min-h-screen p-4">
+            <div className="bg-background p-4">
                 <div className="mx-auto max-w-7xl">
                     {/* Tab Navigation */}
-                    <div className="bg-card/80 border-border mb-6 flex rounded-xl border p-1 shadow-lg backdrop-blur-md">
+                    <div className="bg-card/80 border-border mb-6 flex flex-row gap-1 rounded-xl border p-1 shadow-lg backdrop-blur-md *:cursor-pointer">
                         <button
                             onClick={() => setActiveTab('menu')}
                             className={`flex-1 rounded-lg px-6 py-3 text-sm font-semibold transition-all duration-200 ${
@@ -43,6 +43,6 @@ export default function MenuPage() {
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     )
 }

@@ -2,9 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-
 import {
     Select,
     SelectContent,
@@ -12,9 +10,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Plus, Edit, Trash2, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
 import apiService from '@/services/apiService'
 import type { MenuItem } from '@/lib/types'
+import MenuItemCard from './cards/MenuItemCard'
+import AddNewItemCard from './cards/AddNewItemCard'
+import MenuAddEditModal from './modals/MenuAddEditModal'
 
 // Định nghĩa các loại món cố định
 const MENU_CATEGORIES = [
@@ -236,76 +237,18 @@ export default function MenuManagement() {
             {/* Menu Items Grid */}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                 {/* Add New Item Card */}
-                <div
-                    onClick={() => setShowAddModal(true)}
-                    className="group border-primary/30 from-primary/5 to-accent/5 hover:border-primary/50 relative aspect-square cursor-pointer rounded-2xl border-2 border-dashed bg-gradient-to-br p-6 transition-all duration-200 hover:shadow-lg"
-                >
-                    <div className="text-primary flex h-full flex-col items-center justify-center">
-                        <div className="bg-primary/10 mb-3 rounded-full p-4 transition-transform group-hover:scale-110">
-                            <Plus className="h-8 w-8" />
-                        </div>
-                        <span className="text-sm font-medium">Thêm món</span>
-                    </div>
-                </div>
+                <AddNewItemCard onClick={() => setShowAddModal(true)} />
 
                 {/* Menu Item Cards */}
                 {filteredItems.map((item) => (
-                    <div
+                    <MenuItemCard
                         key={item.id}
-                        className="group bg-card border-border relative overflow-hidden rounded-2xl border shadow-md transition-all duration-200 hover:shadow-xl"
-                    >
-                        {/* Image */}
-                        <div className="bg-muted aspect-square overflow-hidden">
-                            {item.image_url ? (
-                                <img
-                                    src={item.image_url}
-                                    alt={item.name}
-                                    className="h-full w-full object-cover object-center transition-transform group-hover:scale-105"
-                                />
-                            ) : (
-                                <div className="text-muted-foreground flex h-full items-center justify-center">
-                                    <div className="text-center">
-                                        <div className="text-3xl">
-                                            {getCategoryLabel(item.category).split(' ')[0]}
-                                        </div>
-                                        <div className="text-xs">Chưa có ảnh</div>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-4">
-                            <div className="mb-4 flex items-center justify-between">
-                                <h3 className="text-foreground line-clamp-1 font-semibold">
-                                    {item.name}
-                                </h3>
-                                <span className="text-primary text-sm font-bold">
-                                    {formatPrice(item.price)}
-                                </span>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleEdit(item)}
-                                    className="flex-1"
-                                >
-                                    <Edit className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handleDelete(item.id)}
-                                    className="text-destructive hover:bg-destructive/10 flex-1"
-                                >
-                                    <Trash2 className="h-3 w-3" />
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
+                        item={item}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                        getCategoryLabel={getCategoryLabel}
+                        formatPrice={formatPrice}
+                    />
                 ))}
             </div>
 
@@ -346,106 +289,16 @@ export default function MenuManagement() {
             )}
 
             {/* Add/Edit Modal */}
-            <Dialog open={showAddModal} onOpenChange={resetForm}>
-                <DialogContent className="bg-popover border-border shadow-2xl sm:max-w-md">
-                    <DialogHeader>
-                        <DialogTitle className="text-popover-foreground">
-                            {editingItem ? 'Chỉnh sửa món' : 'Thêm món mới'}
-                        </DialogTitle>
-                    </DialogHeader>
-
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label className="text-popover-foreground text-sm font-medium">
-                                Tên món *
-                            </label>
-                            <Input
-                                required
-                                value={formData.name}
-                                onChange={(e) =>
-                                    setFormData((prev) => ({ ...prev, name: e.target.value }))
-                                }
-                                placeholder="Nhập tên món..."
-                                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
-                            />
-                        </div>
-
-                        <div>
-                            <label className="text-popover-foreground text-sm font-medium">
-                                Giá *
-                            </label>
-                            <Input
-                                type="number"
-                                required
-                                value={formData.price}
-                                onChange={(e) =>
-                                    setFormData((prev) => ({ ...prev, price: e.target.value }))
-                                }
-                                placeholder="0"
-                                min="0"
-                                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-popover-foreground text-sm font-medium">
-                                Image URL
-                            </label>
-                            <Input
-                                type="text"
-                                value={formData.image_url || ''}
-                                onChange={(e) =>
-                                    setFormData((prev) => ({ ...prev, image_url: e.target.value }))
-                                }
-                                placeholder="Nhập URL ảnh..."
-                                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-popover-foreground text-sm font-medium">
-                                Loại *
-                            </label>
-                            <Select
-                                value={formData.category}
-                                onValueChange={(value) =>
-                                    setFormData((prev) => ({ ...prev, category: value }))
-                                }
-                            >
-                                <SelectTrigger className="bg-input border-border text-foreground">
-                                    <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent className="bg-popover border-border">
-                                    {MENU_CATEGORIES.map((category) => (
-                                        <SelectItem
-                                            key={category.value}
-                                            value={category.value}
-                                            className="text-popover-foreground hover:bg-accent hover:text-accent-foreground"
-                                        >
-                                            {category.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="flex gap-3 pt-4">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={resetForm}
-                                className="bg-secondary text-secondary-foreground border-border hover:bg-secondary/80 flex-1"
-                            >
-                                Hủy
-                            </Button>
-                            <Button
-                                type="submit"
-                                className="bg-primary text-primary-foreground hover:bg-primary/90 flex-1"
-                            >
-                                {editingItem ? 'Cập nhật' : 'Thêm'}
-                            </Button>
-                        </div>
-                    </form>
-                </DialogContent>
-            </Dialog>
+            <MenuAddEditModal
+                open={showAddModal}
+                onOpenChange={resetForm}
+                editingItem={editingItem}
+                formData={formData}
+                setFormData={setFormData}
+                onSubmit={handleSubmit}
+                onReset={resetForm}
+                menuCategories={MENU_CATEGORIES}
+            />
         </div>
     )
 }
