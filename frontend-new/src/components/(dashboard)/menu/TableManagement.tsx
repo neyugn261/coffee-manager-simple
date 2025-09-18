@@ -1,8 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
 import apiService from '@/services/apiService'
 import type { Table } from '@/lib/types'
 import TableCard from './cards/TableCard'
