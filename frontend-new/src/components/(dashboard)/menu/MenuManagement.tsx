@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/select'
 import { Plus, Edit, Trash2, Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react'
 import apiService from '@/services/apiService'
+import type { MenuItem } from '@/lib/types'
 
 // Định nghĩa các loại món cố định
 const MENU_CATEGORIES = [
@@ -31,13 +32,7 @@ const MENU_CATEGORIES = [
     { value: 'other', label: '✨ Khác' },
 ]
 
-interface MenuItem {
-    id: number
-    name: string
-    price: number
-    category: string
-    image_url?: string
-}
+// Using MenuItem from types.ts
 
 export default function MenuManagement() {
     const [menuItems, setMenuItems] = useState<MenuItem[]>([])

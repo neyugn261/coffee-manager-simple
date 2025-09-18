@@ -1,18 +1,18 @@
 'use client'
 
 import Link from 'next/link'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Header from '@/components/(dashboard)/Header'
 import StatusBadge from '@/components/(dashboard)/order/StatusBadge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useTables } from '@/store'
+import apiService from '@/services/apiService'
 import { getAllStatuses } from '@/lib/statuses'
-import type { Status } from '@/lib/types'
+import type { Status, Table } from '@/lib/types'
 
 export default function EatInIndex() {
-    const { state, actions } = useTables()
-    const { tables, loading, error } = state
-    const { fetchTables } = actions
+    const [tables, setTables] = useState<Table[]>([])
+    const [loading, setLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
     // Memoized values for optimization
     const tableCount = useMemo(() => tables.length, [tables.length])
@@ -28,12 +28,25 @@ export default function EatInIndex() {
         return stats
     }, [tables])
 
+    const fetchTables = async () => {
+        try {
+            setLoading(true)
+            setError(null)
+            const tablesData = await apiService.table.getAll()
+            setTables(tablesData)
+        } catch (error) {
+            setError(error instanceof Error ? error.message : 'Failed to fetch tables')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     // Load tables on component mount
     useEffect(() => {
         if (tables.length === 0) {
             fetchTables()
         }
-    }, [fetchTables, tables.length])
+    }, [])
 
     if (loading && tables.length === 0) {
         return (

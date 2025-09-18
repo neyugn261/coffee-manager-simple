@@ -6,10 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 import apiService from '@/services/apiService'
-interface Table {
-    id: number
-    table_name: string
-}
+import type { Table } from '@/lib/types'
 
 export default function TableManagement() {
     const [tables, setTables] = useState<Table[]>([])

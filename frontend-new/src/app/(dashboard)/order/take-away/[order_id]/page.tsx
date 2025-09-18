@@ -6,29 +6,41 @@ import Header from '@/components/(dashboard)/Header'
 import CartDrawer from '@/components/(dashboard)/order/CartDrawer'
 import MenuCard from '@/components/(dashboard)/order/MenuCard'
 import SearchFilter from '@/components/(dashboard)/order/SearchFilter'
-import { useMenu, useOrders } from '@/store'
-import type { Category, MenuItem } from '@/lib/types'
+import apiService from '@/services/apiService'
+import type { Category, MenuItem, Order, OrderLine } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 
 export default function TakeAwayOrderDetailPage() {
     const params = useParams()
     const router = useRouter()
-    const { state: menuState, actions: menuActions } = useMenu()
-    const { state: orderState, actions: orderActions } = useOrders()
-    const { items: menu } = menuState
-    const { orders } = orderState
-    const { fetchItems } = menuActions
-    const { createOrder, addLine } = orderActions
-
     const orderId = params.order_id as string
+
+    const [menu, setMenu] = useState<MenuItem[]>([])
+    const [orders, setOrders] = useState<Order[]>([])
     const [isNewOrder, setIsNewOrder] = useState(false)
     const [search, setSearch] = useState('')
     const [category, setCategory] = useState<Category>('all')
+    const [loading, setLoading] = useState(false)
 
-    // Load menu on component mount
+    // Load menu and orders on component mount
     useEffect(() => {
-        fetchItems()
-    }, [fetchItems])
+        const fetchData = async () => {
+            try {
+                setLoading(true)
+                const [menuData, ordersData] = await Promise.all([
+                    apiService.menu.getAll(),
+                    apiService.order.getAll(),
+                ])
+                setMenu(menuData)
+                setOrders(ordersData)
+            } catch (error) {
+                console.error('Error fetching data:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
 
     useEffect(() => {
         if (orderId.startsWith('temp-')) {
@@ -36,7 +48,8 @@ export default function TakeAwayOrderDetailPage() {
             setIsNewOrder(true)
         } else {
             // Tìm đơn hàng theo ID
-            const foundOrder = orders.find((o) => o.id === orderId)
+            const orderIdNum = parseInt(orderId)
+            const foundOrder = orders.find((o) => o.id === orderIdNum)
             if (!foundOrder) {
                 // Không tìm thấy đơn hàng, redirect về danh sách
                 router.push('/order/take-away')
@@ -61,36 +74,35 @@ export default function TakeAwayOrderDetailPage() {
 
         try {
             // Check if this is the first item
-            const currentOrder = orders.find((o) => o.id === orderId)
-            if (!currentOrder || !currentOrder.lines || currentOrder.lines.length === 0) {
+            const orderIdNum = parseInt(orderId)
+            const currentOrder = orders.find((o) => o.id === orderIdNum)
+            if (!currentOrder || !currentOrder.items || currentOrder.items.length === 0) {
                 console.log('🍽️ Creating new order with first item')
-                await createOrder({
-                    type: 'take-away',
-                    lines: [{ item, qty: 1 }],
+                const newOrder = await apiService.order.createTakeaway({
+                    items: [{ menu_item_id: item.id, quantity: 1 }],
                     notes: '',
                 })
 
-                // Sau khi tạo đơn hàng thành công, cập nhật orderId
-                // Tìm đơn hàng mới nhất vừa tạo
-                setTimeout(() => {
-                    const newOrders = orders.filter(
-                        (o) => o.type === 'take-away' && o.status !== 'paid',
-                    )
-                    const latestOrder = newOrders.sort((a, b) => Number(b.id) - Number(a.id))[0]
-                    if (latestOrder) {
-                        console.log('🔄 Updating orderId to:', latestOrder.id)
-                        // Cập nhật URL để reflect đơn hàng thật
-                        router.replace(`/order/take-away/${latestOrder.id}`)
-                    }
-                }, 100)
+                // Update orders list
+                setOrders((prev) => [...prev, newOrder])
+
+                // Update URL to reflect real order ID
+                router.replace(`/order/take-away/${newOrder.id}`)
             } else {
-                // Add to existing order
-                console.log('➕ Adding to existing order')
-                const orderLine = {
-                    item: item,
-                    qty: 1,
-                }
-                await addLine(orderId, orderLine)
+                // For existing orders, we would need to implement add line functionality
+                // For now, we'll create a new order with additional items
+                console.log('➕ Adding to existing order - creating new order with all items')
+                const allItems = [...currentOrder.items]
+                allItems.push({ menu_item_id: item.id, quantity: 1 })
+
+                const updatedOrder = await apiService.order.createTakeaway({
+                    items: allItems,
+                    notes: currentOrder.notes || '',
+                })
+
+                // Remove old order and add new one
+                setOrders((prev) => prev.filter((o) => o.id !== orderIdNum).concat(updatedOrder))
+                router.replace(`/order/take-away/${updatedOrder.id}`)
             }
         } catch (error) {
             console.error('❌ Failed to add item:', error)
@@ -99,11 +111,12 @@ export default function TakeAwayOrderDetailPage() {
 
     const handleSaveOrder = async () => {
         if (!orderId) return
-        const order = orders.find((o) => o.id === orderId)
+        const orderIdNum = parseInt(orderId)
+        const order = orders.find((o) => o.id === orderIdNum)
         if (!order) return
 
         // Kiểm tra đơn hàng có món không
-        if (!order.lines || order.lines.length === 0) {
+        if (!order.items || order.items.length === 0) {
             alert('Đơn hàng phải có ít nhất 1 món để lưu')
             return
         }
@@ -112,13 +125,11 @@ export default function TakeAwayOrderDetailPage() {
             // Chỉ lưu nếu đây là đơn hàng temp (chưa có ID thật từ database)
             if (isNewOrder) {
                 console.log('💾 Saving new order to database:', order)
-                console.log('📋 Order lines:', order.lines)
+                console.log('📋 Order items:', order.items)
                 console.log('📝 Order notes:', order.notes)
 
-                // Sử dụng createOrder để lưu đơn hàng vào database
-                const result = await createOrder({
-                    type: 'take-away',
-                    lines: order.lines,
+                const result = await apiService.order.createTakeaway({
+                    items: order.items,
                     notes: order.notes || '',
                 })
 

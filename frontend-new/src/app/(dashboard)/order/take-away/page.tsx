@@ -1,22 +1,24 @@
 'use client'
 
-import { useEffect, useCallback } from 'react'
-import { useOrders } from '@/store'
+import { useEffect, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Header from '@/components/(dashboard)/Header'
 import { BrushCleaning, Plus } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import apiService from '@/services/apiService'
+import type { Order } from '@/lib/types'
 
 export default function TakeAwayListPage() {
-    const { state, actions } = useOrders()
-    const { orders } = state
-    const { createOrder } = actions
+    const [orders, setOrders] = useState<Order[]>([])
+    const [loading, setLoading] = useState(false)
     const router = useRouter()
 
-    // Lọc các đơn mang về chưa hoàn thành (status !== 'paid')
-    const takeAwayOrders = orders.filter((o) => o.type === 'take-away' && o.status !== 'paid')
+    // Lọc các đơn mang về chưa hoàn thành (payment_status !== 'paid')
+    const takeAwayOrders = orders.filter(
+        (o) => o.order_type === 'takeaway' && o.payment_status !== 'paid',
+    )
 
     // Redirect đến trang tạo đơn mới
     const handleCreate = () => {
@@ -25,14 +27,22 @@ export default function TakeAwayListPage() {
         router.push(`/order/take-away/${tempId}`)
     }
 
-    const fetchOrdersCallback = useCallback(() => {
-        actions.fetchOrders()
-    }, [actions.fetchOrders])
+    const fetchOrders = async () => {
+        try {
+            setLoading(true)
+            const ordersData = await apiService.order.getAll()
+            setOrders(ordersData)
+        } catch (error) {
+            console.error('Error fetching orders:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     useEffect(() => {
         // Fetch lại đơn hàng khi vào trang
-        fetchOrdersCallback()
-    }, [fetchOrdersCallback])
+        fetchOrders()
+    }, [])
 
     return (
         <div className="bg-background">
@@ -69,10 +79,8 @@ export default function TakeAwayListPage() {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-muted-foreground text-sm">
-                                            {order.lines.length} món | Tổng:{' '}
-                                            {order.lines
-                                                .reduce((s, l) => s + l.qty * l.item.price, 0)
-                                                .toLocaleString()}
+                                            {order.items.length} món | Tổng:{' '}
+                                            {order.total.toLocaleString()}đ
                                         </div>
                                     </CardContent>
                                 </Card>

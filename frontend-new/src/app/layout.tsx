@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Footer from '@/components/(root)/Footer'
-import { StoreProvider } from '@/store'
 import { AuthProvider } from '@/lib/auth'
 
 const text = Inter({
@@ -29,9 +28,7 @@ export default function RootLayout({
                 className={`${text.variable} flex min-h-svh w-svw flex-col justify-between bg-[image:var(--background)] antialiased`}
             >
                 <div className="flex-1">
-                    <AuthProvider>
-                        <StoreProvider>{children}</StoreProvider>
-                    </AuthProvider>
+                    <AuthProvider>{children}</AuthProvider>
                 </div>
                 <Footer />
             </body>

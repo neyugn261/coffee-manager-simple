@@ -6,28 +6,40 @@ import Header from '@/components/(dashboard)/Header'
 import CartDrawer from '@/components/(dashboard)/order/CartDrawer'
 import MenuCard from '@/components/(dashboard)/order/MenuCard'
 import SearchFilter from '@/components/(dashboard)/order/SearchFilter'
-import { useMenu, useOrders } from '@/store'
+import apiService from '@/services/apiService'
 import { saveOrderToApi } from '@/lib/utils'
-import type { Category, MenuItem } from '@/lib/types'
+import type { Category, MenuItem, Order } from '@/lib/types'
 import { Button } from '@/components/ui/button'
 
 export default function TableDetailPage() {
     const { table_id } = useParams<{ table_id: string }>()
-    const { state: menuState, actions: menuActions } = useMenu()
-    const { state: orderState, actions: orderActions } = useOrders()
-    const { items: menu } = menuState
-    const { orders } = orderState
-    const { fetchItems } = menuActions
-    const { createOrder, addLine, attachServer } = orderActions
 
+    const [menu, setMenu] = useState<MenuItem[]>([])
+    const [orders, setOrders] = useState<Order[]>([])
     const [orderId, setOrderId] = useState<string | null>(null)
     const [search, setSearch] = useState('')
     const [category, setCategory] = useState<Category>('all')
+    const [loading, setLoading] = useState(false)
 
-    // Load menu on component mount
+    // Load menu and orders on component mount
     useEffect(() => {
-        fetchItems()
-    }, [fetchItems])
+        const fetchData = async () => {
+            try {
+                setLoading(true)
+                const [menuData, ordersData] = await Promise.all([
+                    apiService.menu.getAll(),
+                    apiService.order.getAll(),
+                ])
+                setMenu(menuData)
+                setOrders(ordersData)
+            } catch (error) {
+                console.error('Error fetching data:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchData()
+    }, [])
 
     // Create eat-in order for this table
     useEffect(() => {
@@ -60,21 +72,33 @@ export default function TableDetailPage() {
         try {
             // Check if this is the first item
             const currentOrder = orders.find((o) => o.id === orderId)
-            if (!currentOrder || !currentOrder.lines || currentOrder.lines.length === 0) {
+            if (!currentOrder || !currentOrder.items || currentOrder.items.length === 0) {
                 console.log('🍽️ Creating new order with first item')
-                await createOrder({
-                    type: 'eat-in',
-                    tableId: String(table_id),
-                    lines: [{ item, qty: 1 }],
+                const newOrder = await apiService.order.createForTable(table_id, {
+                    items: [{ menu_item_id: item.id, quantity: 1 }],
+                    notes: '',
                 })
+
+                // Update orders list
+                setOrders((prev) => [...prev, newOrder])
+
+                // Update orderId to real order ID
+                setOrderId(newOrder.id)
             } else {
-                // Add to existing order
-                console.log('➕ Adding to existing order')
-                const orderLine = {
-                    item: item,
-                    qty: 1,
-                }
-                await addLine(orderId, orderLine)
+                // For existing orders, we would need to implement add line functionality
+                // For now, we'll create a new order with additional items
+                console.log('➕ Adding to existing order - creating new order with all items')
+                const allItems = [...currentOrder.items]
+                allItems.push({ menu_item_id: item.id, quantity: 1 })
+
+                const updatedOrder = await apiService.order.createForTable(table_id, {
+                    items: allItems,
+                    notes: currentOrder.notes || '',
+                })
+
+                // Remove old order and add new one
+                setOrders((prev) => prev.filter((o) => o.id !== orderId).concat(updatedOrder))
+                setOrderId(updatedOrder.id)
             }
         } catch (error) {
             console.error('❌ Failed to add item:', error)
@@ -89,7 +113,7 @@ export default function TableDetailPage() {
         try {
             const saved = await saveOrderToApi(order)
             if (saved?.id) {
-                await attachServer(orderId, saved.id)
+                console.log('✅ Order saved successfully:', saved)
             }
         } catch (error) {
             console.error('Failed to save order:', error)

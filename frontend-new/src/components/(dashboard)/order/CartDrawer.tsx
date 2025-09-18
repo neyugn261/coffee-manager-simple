@@ -1,29 +1,57 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
-import { useOrders } from '@/store'
+import apiService from '@/services/apiService'
 import { updateOrderStatusOnApi } from '@/lib/utils'
-import type { OrderStatus } from '@/lib/types'
+import type { OrderStatus, Order } from '@/lib/types'
 
 export default function CartDrawer({ orderId }: { orderId: string }) {
-    const { state, actions } = useOrders()
-    const { orders } = state
-    const { updateOrderStatus } = actions
+    const [order, setOrder] = useState<Order | null>(null)
+    const [loading, setLoading] = useState(false)
 
-    const order = orders.find((o) => o.id === orderId)
+    useEffect(() => {
+        const fetchOrder = async () => {
+            try {
+                setLoading(true)
+                const orders = await apiService.order.getAll()
+                const foundOrder = orders.find((o) => o.id === orderId)
+                setOrder(foundOrder || null)
+            } catch (error) {
+                console.error('Error fetching order:', error)
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchOrder()
+    }, [orderId])
+
     if (!order) return null
 
-    const total = order.lines.reduce((s, l) => s + l.qty * l.item.price, 0)
-    const itemCount = order.lines.reduce((s, l) => s + l.qty, 0)
+    // Calculate total and item count from order items
+    const total = order.total || 0
+    const itemCount = order.items.reduce((s, item) => s + item.quantity, 0)
 
     const handleStatusUpdate = async (status: OrderStatus) => {
-        await updateOrderStatus(orderId, status)
+        try {
+            setLoading(true)
+            // Update order status via API
+            if (status === 'paid') {
+                const updatedOrder = await apiService.order.updatePayment(orderId, 'paid')
+                setOrder(updatedOrder)
+            }
 
-        // Also update via API if there's a serverId
-        if (order.serverId) {
-            const apiStatus =
-                status === 'serving' ? 'preparing' : status === 'paid' ? 'completed' : 'pending'
-            await updateOrderStatusOnApi(order.serverId, apiStatus)
+            // Also update via API if there's a serverId
+            if (order.serverId) {
+                const apiStatus =
+                    status === 'serving' ? 'preparing' : status === 'paid' ? 'completed' : 'pending'
+                await updateOrderStatusOnApi(order.serverId, apiStatus)
+            }
+        } catch (error) {
+            console.error('Error updating order status:', error)
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -42,17 +70,15 @@ export default function CartDrawer({ orderId }: { orderId: string }) {
                     <SheetTitle className="text-foreground">Đơn #{order.id}</SheetTitle>
                 </SheetHeader>
                 <div className="mt-4 space-y-2">
-                    {order.lines.map((l) => (
+                    {order.items.map((item, index) => (
                         <div
-                            key={l.item.id}
+                            key={`${item.menu_item_id}-${index}`}
                             className="bg-secondary/50 flex justify-between rounded-lg p-3 text-sm"
                         >
                             <span className="text-foreground">
-                                {l.item.name} × {l.qty}
+                                Item #{item.menu_item_id} × {item.quantity}
                             </span>
-                            <span className="text-accent font-medium">
-                                {(l.qty * l.item.price).toLocaleString()}đ
-                            </span>
+                            <span className="text-accent font-medium">{item.quantity} items</span>
                         </div>
                     ))}
                 </div>
