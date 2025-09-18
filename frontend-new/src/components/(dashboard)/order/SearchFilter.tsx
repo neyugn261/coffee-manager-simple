@@ -44,16 +44,46 @@ export default function SearchFilter({
                             🍽️ Tất cả
                         </SelectItem>
                         <SelectItem
-                            value="drink"
+                            value="coffee"
                             className="hover:bg-primary/10 rounded-lg px-3 py-2"
                         >
-                            ☕ Đồ uống
+                            ☕ Cà phê
+                        </SelectItem>
+                        <SelectItem
+                            value="latte"
+                            className="hover:bg-primary/10 rounded-lg px-3 py-2"
+                        >
+                            🥛 Latte
+                        </SelectItem>
+                        <SelectItem
+                            value="milkTea"
+                            className="hover:bg-primary/10 rounded-lg px-3 py-2"
+                        >
+                            🧋 Trà sữa
+                        </SelectItem>
+                        <SelectItem
+                            value="soda"
+                            className="hover:bg-primary/10 rounded-lg px-3 py-2"
+                        >
+                            🥤 Soda
+                        </SelectItem>
+                        <SelectItem
+                            value="juice"
+                            className="hover:bg-primary/10 rounded-lg px-3 py-2"
+                        >
+                            🧃 Nước ép
                         </SelectItem>
                         <SelectItem
                             value="food"
                             className="hover:bg-primary/10 rounded-lg px-3 py-2"
                         >
                             🍕 Đồ ăn
+                        </SelectItem>
+                        <SelectItem
+                            value="other"
+                            className="hover:bg-primary/10 rounded-lg px-3 py-2"
+                        >
+                            🍽️ Khác
                         </SelectItem>
                     </SelectContent>
                 </Select>
