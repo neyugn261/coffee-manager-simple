@@ -1,4 +1,5 @@
 import { api } from './api'
+import type { MenuItem, Table, Order } from '@/lib/types'
 
 /**
  * ===============================================
@@ -9,57 +10,10 @@ import { api } from './api'
  * ===============================================
  */
 
-// Types for API service (reusing from api.ts)
-interface MenuItem {
-    id: number
-    name: string
-    price: number
-    category:
-        | 'yaourt'
-        | 'milkTea'
-        | 'soda'
-        | 'fruitTea'
-        | 'topping'
-        | 'latte'
-        | 'food'
-        | 'coffee'
-        | 'milo-cacao'
-        | 'juice'
-        | 'bottleDrink'
-        | 'other'
-    image_url?: string
-    created_at?: string
-    updated_at?: string
-}
-
-interface Table {
-    id: number
-    table_name: string
-    status: 'empty' | 'occupied'
-    role: 'HOST' | 'CHILD' | 'NORMAL'
-    is_merged: boolean
-    host_id?: number | null
-    merged_tables?: number[] | null
-    created_at: string
-    updated_at: string
-}
-
+// Types for API service (reusing from types.ts)
 interface OrderItem {
     menu_item_id: number
     quantity: number
-}
-
-interface Order {
-    id: number
-    table_id?: number
-    customer_name?: string | null
-    order_type: 'takeaway' | 'dine_in'
-    payment_status: 'unpaid' | 'paid'
-    total: number
-    notes?: string | null
-    created_at: string
-    paid_at?: string | null
-    items: OrderItem[]
 }
 
 interface CreateMenuItemData {

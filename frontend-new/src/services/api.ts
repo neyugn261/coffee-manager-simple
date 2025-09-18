@@ -1,45 +1,13 @@
 // Base API configuration
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000/api'
 
-// Specific types for API data structures
-interface MenuItem {
-    id: number
-    name: string
-    price: number
-    category: 'coffee' | 'tea' | 'juice' | 'food' | 'other'
-    image_url?: string
-    created_at?: string
-    updated_at?: string
-}
+import type { MenuItem, Table, Order } from '@/lib/types'
 
-interface Table {
-    id: number
-    table_name: string
-    status: 'empty' | 'occupied'
-    role: 'HOST' | 'CHILD' | 'NORMAL'
-    is_merged: boolean
-    host_id?: number | null
-    merged_tables?: number[] | null
-    created_at: string
-    updated_at: string
-}
+// Specific types for API data structures
 
 interface OrderItem {
     menu_item_id: number
     quantity: number
-}
-
-interface Order {
-    id: number
-    table_id?: number
-    customer_name?: string | null
-    order_type: 'takeaway' | 'dine_in'
-    payment_status: 'unpaid' | 'paid'
-    total: number
-    notes?: string | null
-    created_at: string
-    paid_at?: string | null
-    items: OrderItem[]
 }
 
 interface AuthResponse {
@@ -97,7 +65,19 @@ interface DeleteResponse {
 interface CreateMenuItemRequest {
     name: string
     price: number
-    category?: 'coffee' | 'tea' | 'juice' | 'food' | 'other'
+    category?:
+        | 'yaourt'
+        | 'milkTea'
+        | 'soda'
+        | 'fruitTea'
+        | 'topping'
+        | 'latte'
+        | 'food'
+        | 'coffee'
+        | 'milo-cacao'
+        | 'juice'
+        | 'bottleDrink'
+        | 'other'
     image_url?: string
 }
 

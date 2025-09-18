@@ -15,7 +15,7 @@ export default function CartDrawer({ orderId }: { orderId: string }) {
             try {
                 setLoading(true)
                 const orders = await apiService.order.getAll()
-                const foundOrder = orders.find((o) => o.id === orderId)
+                const foundOrder = orders.find((o) => o.id === parseInt(orderId))
                 setOrder(foundOrder || null)
             } catch (error) {
                 console.error('Error fetching order:', error)
@@ -38,7 +38,7 @@ export default function CartDrawer({ orderId }: { orderId: string }) {
             setLoading(true)
             // Update order status via API
             if (status === 'paid') {
-                const updatedOrder = await apiService.order.updatePayment(orderId, 'paid')
+                const updatedOrder = await apiService.order.updatePayment(parseInt(orderId), 'paid')
                 setOrder(updatedOrder)
             }
 

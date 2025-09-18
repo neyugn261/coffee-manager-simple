@@ -57,7 +57,20 @@ export default function MenuCard({ item, onAdd }: Props) {
                 <div>
                     <span className="bg-accent/15 text-accent ring-accent/30 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium ring-1 ring-inset">
                         <span className="bg-accent h-2 w-2 rounded-full shadow-[0_0_0_2px_var(--accent-shadow)]" />
-                        {item.categoryLabel ?? (item.category === 'drink' ? 'Cà phê' : 'Đồ ăn')}
+                        {item.categoryLabel ??
+                            ([
+                                'coffee',
+                                'latte',
+                                'milkTea',
+                                'soda',
+                                'fruitTea',
+                                'yaourt',
+                                'milo-cacao',
+                                'juice',
+                                'bottleDrink',
+                            ].includes(item.category)
+                                ? 'Đồ uống'
+                                : 'Đồ ăn')}
                     </span>
                 </div>
 

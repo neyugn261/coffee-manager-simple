@@ -16,7 +16,7 @@ export default function TableDetailPage() {
 
     const [menu, setMenu] = useState<MenuItem[]>([])
     const [orders, setOrders] = useState<Order[]>([])
-    const [orderId, setOrderId] = useState<string | null>(null)
+    const [orderId, setOrderId] = useState<number | null>(null)
     const [search, setSearch] = useState('')
     const [category, setCategory] = useState<Category>('all')
     const [loading, setLoading] = useState(false)
@@ -48,9 +48,8 @@ export default function TableDetailPage() {
         const createEatInOrder = async () => {
             console.log('🍽️ Table ID ready:', table_id)
             // Don't create empty order - will create when user adds first item
-            const tempId = 'temp-' + table_id + '-' + Date.now()
-            console.log('✅ Ready to take orders for table with temp ID:', tempId)
-            setOrderId(tempId)
+            // Set to null initially, will be set when first order is created
+            console.log('✅ Ready to take orders for table:', table_id)
         }
         createEatInOrder()
     }, [table_id, orderId])
@@ -66,15 +65,17 @@ export default function TableDetailPage() {
     )
 
     const handleAddLine = async (item: MenuItem) => {
-        if (!orderId) return
         console.log('➕ Adding item to order:', item.name)
 
         try {
-            // Check if this is the first item
-            const currentOrder = orders.find((o) => o.id === orderId)
-            if (!currentOrder || !currentOrder.items || currentOrder.items.length === 0) {
+            // Check if there's an existing order for this table
+            const existingOrder = orders.find(
+                (o) => o.table_id === parseInt(table_id) && o.payment_status === 'unpaid',
+            )
+
+            if (!existingOrder) {
                 console.log('🍽️ Creating new order with first item')
-                const newOrder = await apiService.order.createForTable(table_id, {
+                const newOrder = await apiService.order.createForTable(parseInt(table_id), {
                     items: [{ menu_item_id: item.id, quantity: 1 }],
                     notes: '',
                 })
@@ -88,16 +89,18 @@ export default function TableDetailPage() {
                 // For existing orders, we would need to implement add line functionality
                 // For now, we'll create a new order with additional items
                 console.log('➕ Adding to existing order - creating new order with all items')
-                const allItems = [...currentOrder.items]
+                const allItems = [...existingOrder.items]
                 allItems.push({ menu_item_id: item.id, quantity: 1 })
 
-                const updatedOrder = await apiService.order.createForTable(table_id, {
+                const updatedOrder = await apiService.order.createForTable(parseInt(table_id), {
                     items: allItems,
-                    notes: currentOrder.notes || '',
+                    notes: existingOrder.notes || '',
                 })
 
                 // Remove old order and add new one
-                setOrders((prev) => prev.filter((o) => o.id !== orderId).concat(updatedOrder))
+                setOrders((prev) =>
+                    prev.filter((o) => o.id !== existingOrder.id).concat(updatedOrder),
+                )
                 setOrderId(updatedOrder.id)
             }
         } catch (error) {
@@ -141,7 +144,7 @@ export default function TableDetailPage() {
                         >
                             Lưu đơn
                         </Button>
-                        <CartDrawer orderId={orderId} />
+                        <CartDrawer orderId={orderId?.toString() || ''} />
                     </div>
                 </div>
             </div>
