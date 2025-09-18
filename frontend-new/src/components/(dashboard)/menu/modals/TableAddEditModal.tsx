@@ -3,11 +3,12 @@
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Table } from '@/lib/types'
 
 interface TableAddEditModalProps {
     open: boolean
     onOpenChange: (open: boolean) => void
-    editingTable: any | null
+    editingTable: Table | null
     tableName: string
     setTableName: (name: string) => void
     onSubmit: (e: React.FormEvent) => void
@@ -35,7 +36,7 @@ export default function TableAddEditModal({
                 <form onSubmit={onSubmit} className="space-y-4">
                     <div>
                         <label className="text-popover-foreground text-sm font-medium">
-                            Tên bàn *
+                            Tên bàn <span className="text-red-500">*</span>
                         </label>
                         <Input
                             required

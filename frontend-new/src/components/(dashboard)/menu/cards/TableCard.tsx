@@ -12,7 +12,7 @@ interface TableCardProps {
 
 export default function TableCard({ table, onEdit, onDelete }: TableCardProps) {
     return (
-        <div className="group bg-card border-border relative overflow-hidden rounded-2xl border p-6 shadow-md transition-all duration-200 hover:shadow-xl">
+        <div className="group bg-card border-border relative overflow-hidden rounded-2xl border p-6 shadow-md transition-all duration-200 select-none hover:shadow-xl">
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                     <div className="bg-primary/10 text-primary flex h-12 w-12 items-center justify-center rounded-xl">

@@ -13,6 +13,7 @@ export default function TableManagement() {
     const [tables, setTables] = useState<Table[]>([])
     const [showAddModal, setShowAddModal] = useState(false)
     const [editingTable, setEditingTable] = useState<Table | null>(null)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [loading, setLoading] = useState(false)
 
     // Form state
@@ -94,13 +95,6 @@ export default function TableManagement() {
                         Quản lý các bàn trong quán của bạn
                     </p>
                 </div>
-                <Button
-                    onClick={() => setShowAddModal(true)}
-                    className="bg-primary text-primary-foreground hover:bg-primary/90"
-                >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Thêm bàn
-                </Button>
             </div>
 
             {/* Tables Grid */}
