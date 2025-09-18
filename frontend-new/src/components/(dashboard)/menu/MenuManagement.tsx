@@ -16,6 +16,8 @@ import type { MenuItem } from '@/lib/types'
 import MenuItemCard from './cards/MenuItemCard'
 import AddNewItemCard from './cards/AddNewItemCard'
 import MenuAddEditModal from './modals/MenuAddEditModal'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBorderAll } from '@fortawesome/free-solid-svg-icons'
 
 // Định nghĩa các loại món cố định
 const MENU_CATEGORIES = [
@@ -41,6 +43,7 @@ export default function MenuManagement() {
     const [selectedCategory, setSelectedCategory] = useState('all')
     const [showAddModal, setShowAddModal] = useState(false)
     const [editingItem, setEditingItem] = useState<MenuItem | null>(null)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [loading, setLoading] = useState(false)
 
     // Pagination state
@@ -83,6 +86,7 @@ export default function MenuManagement() {
     const totalPages = Math.ceil(filteredItems.length / itemsPerPage)
     const startIndex = (currentPage - 1) * itemsPerPage
     const endIndex = startIndex + itemsPerPage
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const currentItems = filteredItems.slice(startIndex, endIndex)
 
     // Reset to page 1 when filter changes
@@ -195,7 +199,7 @@ export default function MenuManagement() {
                         placeholder="Tìm kiếm món..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
+                        className="h-10.5 pl-10"
                     />
                 </div>
 
@@ -206,7 +210,9 @@ export default function MenuManagement() {
                             <SelectValue placeholder="Chọn loại" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">📋 Tất cả</SelectItem>
+                            <SelectItem value="all">
+                                <FontAwesomeIcon icon={faBorderAll} /> Tất cả
+                            </SelectItem>
                             {MENU_CATEGORIES.map((category) => (
                                 <SelectItem key={category.value} value={category.value}>
                                     {category.label}
@@ -219,11 +225,13 @@ export default function MenuManagement() {
                 {/* Mobile Category Filter */}
                 <div className="sm:hidden">
                     <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger className="h-10 w-12 justify-center p-0">
-                            <Filter className="h-4 w-4" />
+                        <SelectTrigger className="flex flex-row items-center justify-center">
+                            <Filter className="h-2 w-2" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">📋 Tất cả</SelectItem>
+                            <SelectItem value="all">
+                                <FontAwesomeIcon icon={faBorderAll} /> Tất cả
+                            </SelectItem>
                             {MENU_CATEGORIES.map((category) => (
                                 <SelectItem key={category.value} value={category.value}>
                                     {category.label}

@@ -57,7 +57,7 @@ export default function MenuAddEditModal({
                 <form onSubmit={onSubmit} className="space-y-4">
                     <div>
                         <label className="text-popover-foreground text-sm font-medium">
-                            Tên món *
+                            Tên món <span className="text-red-500">*</span>
                         </label>
                         <Input
                             required
@@ -71,7 +71,9 @@ export default function MenuAddEditModal({
                     </div>
 
                     <div>
-                        <label className="text-popover-foreground text-sm font-medium">Giá *</label>
+                        <label className="text-popover-foreground text-sm font-medium">
+                            Giá <span className="text-red-500">*</span>
+                        </label>
                         <Input
                             type="number"
                             required

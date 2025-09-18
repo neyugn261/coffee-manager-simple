@@ -4,6 +4,8 @@ import { useState } from 'react'
 import Header from '@/components/(dashboard)/Header'
 import MenuManagement from '@/components/(dashboard)/menu/MenuManagement'
 import TableManagement from '@/components/(dashboard)/menu/TableManagement'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChair, faMugHot } from '@fortawesome/free-solid-svg-icons'
 
 export default function MenuPage() {
     const [activeTab, setActiveTab] = useState<'menu' | 'tables'>('menu')
@@ -11,7 +13,7 @@ export default function MenuPage() {
     return (
         <div className="h-full w-full">
             <Header title="Quản lý Menu & Bàn" backLink="/" />
-            <div className="bg-background p-4">
+            <div className="bg-background p-8 lg:p-4">
                 <div className="mx-auto max-w-7xl">
                     {/* Tab Navigation */}
                     <div className="bg-card/80 border-border mb-6 flex flex-row gap-1 rounded-xl border p-1 shadow-lg backdrop-blur-md *:cursor-pointer">
@@ -23,7 +25,7 @@ export default function MenuPage() {
                                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                             }`}
                         >
-                            🍽️ Quản lý món
+                            <FontAwesomeIcon icon={faMugHot} /> Quản lý món
                         </button>
                         <button
                             onClick={() => setActiveTab('tables')}
@@ -33,7 +35,7 @@ export default function MenuPage() {
                                     : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
                             }`}
                         >
-                            🪑 Quản lý bàn
+                            <FontAwesomeIcon icon={faChair} /> Quản lý bàn
                         </button>
                     </div>
 
