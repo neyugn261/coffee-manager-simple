@@ -14,7 +14,19 @@ interface MenuItem {
     id: number
     name: string
     price: number
-    category: 'coffee' | 'tea' | 'juice' | 'food' | 'other'
+    category:
+        | 'yaourt'
+        | 'milkTea'
+        | 'soda'
+        | 'fruitTea'
+        | 'topping'
+        | 'latte'
+        | 'food'
+        | 'coffee'
+        | 'milo-cacao'
+        | 'juice'
+        | 'bottleDrink'
+        | 'other'
     image_url?: string
     created_at?: string
     updated_at?: string
@@ -53,7 +65,19 @@ interface Order {
 interface CreateMenuItemData {
     name: string
     price: number
-    category?: 'coffee' | 'tea' | 'juice' | 'food' | 'other'
+    category?:
+        | 'yaourt'
+        | 'milkTea'
+        | 'soda'
+        | 'fruitTea'
+        | 'topping'
+        | 'latte'
+        | 'food'
+        | 'coffee'
+        | 'milo-cacao'
+        | 'juice'
+        | 'bottleDrink'
+        | 'other'
     image_url?: string
 }
 

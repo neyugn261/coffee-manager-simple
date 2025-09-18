@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Plus, Edit, Trash2 } from 'lucide-react'
 import apiService from '@/services/apiService'
 interface Table {
-    id: string
+    id: number
     table_name: string
 }
 
@@ -43,23 +43,18 @@ export default function TableManagement() {
         if (!tableName.trim()) return
 
         try {
-            const newTable: Table = {
-                id: editingTable?.id || Date.now().toString(),
-                table_name: tableName.trim(),
-            }
-
             if (editingTable) {
-                await apiService.table.update(editingTable.id, {
-                    ...newTable,
+                const updatedTable = await apiService.table.update(editingTable.id, {
+                    table_name: tableName.trim(),
                 })
                 setTables((prev) =>
-                    prev.map((table) => (table.id === editingTable.id ? newTable : table)),
+                    prev.map((table) => (table.id === editingTable.id ? updatedTable : table)),
                 )
             } else {
-                await apiService.table.create({
-                    table_name: newTable.table_name,
+                const created = await apiService.table.create({
+                    table_name: tableName.trim(),
                 })
-                setTables((prev) => [...prev, newTable])
+                setTables((prev) => [...prev, created])
             }
 
             resetForm()
@@ -80,9 +75,14 @@ export default function TableManagement() {
         setShowAddModal(true)
     }
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (id: number) => {
         if (confirm('Bạn có chắc muốn xóa bàn này?')) {
-            setTables((prev) => prev.filter((table) => table.id !== id))
+            try {
+                await apiService.table.delete(id)
+                setTables((prev) => prev.filter((table) => table.id !== id))
+            } catch (error) {
+                console.error('Error deleting table:', error)
+            }
         }
     }
 

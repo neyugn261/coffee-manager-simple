@@ -32,7 +32,7 @@ const MENU_CATEGORIES = [
 ]
 
 interface MenuItem {
-    id: string
+    id: number
     name: string
     price: number
     category: string
@@ -65,7 +65,6 @@ export default function MenuManagement() {
     }, [])
 
     const loadMenuItems = async () => {
-        setLoading(true)
         try {
             const data = await apiService.menu.getAll()
             console.log('Menu items from API:', data)
@@ -99,27 +98,46 @@ export default function MenuManagement() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         try {
-            const newItem: MenuItem = {
-                id: editingItem?.id || Date.now().toString(),
-                name: formData.name,
-                price: parseInt(formData.price),
-                category: formData.category,
-                image_url: formData.image_url || undefined,
-            }
-
             if (editingItem) {
-                await apiService.menu.update(editingItem.id, {
-                    ...newItem,
+                const updatedItem = await apiService.menu.update(editingItem.id, {
+                    name: formData.name,
+                    price: parseInt(formData.price),
+                    category: formData.category as
+                        | 'yaourt'
+                        | 'milkTea'
+                        | 'soda'
+                        | 'fruitTea'
+                        | 'topping'
+                        | 'latte'
+                        | 'food'
+                        | 'coffee'
+                        | 'milo-cacao'
+                        | 'juice'
+                        | 'bottleDrink'
+                        | 'other',
+                    image_url: formData.image_url || undefined,
                 })
                 setMenuItems((prev) =>
-                    prev.map((item) => (item.id === editingItem.id ? newItem : item)),
+                    prev.map((item) => (item.id === editingItem.id ? updatedItem : item)),
                 )
             } else {
                 const created = await apiService.menu.create({
-                    name: newItem.name,
-                    price: newItem.price,
-                    category: newItem.category,
-                    image_url: newItem.image_url,
+                    name: formData.name,
+                    price: parseInt(formData.price),
+                    category: formData.category as
+                        | 'yaourt'
+                        | 'milkTea'
+                        | 'soda'
+                        | 'fruitTea'
+                        | 'topping'
+                        | 'latte'
+                        | 'food'
+                        | 'coffee'
+                        | 'milo-cacao'
+                        | 'juice'
+                        | 'bottleDrink'
+                        | 'other',
+                    image_url: formData.image_url || undefined,
                 })
                 setMenuItems((prev) => [...prev, created])
             }
@@ -147,9 +165,14 @@ export default function MenuManagement() {
         setShowAddModal(true)
     }
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (id: number) => {
         if (confirm('Bạn có chắc muốn xóa món này?')) {
-            setMenuItems((prev) => prev.filter((item) => item.id !== id))
+            try {
+                await apiService.menu.delete(id)
+                setMenuItems((prev) => prev.filter((item) => item.id !== id))
+            } catch (error) {
+                console.error('Error deleting item:', error)
+            }
         }
     }
 
