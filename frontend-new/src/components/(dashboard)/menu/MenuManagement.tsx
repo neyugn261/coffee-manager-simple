@@ -204,7 +204,7 @@ export default function MenuManagement() {
                             Tìm kiếm món ăn và lọc theo danh mục
                         </p>
                     </div>
-                    <ReLoadButton fn={loadMenuItems} />
+                    <ReLoadButton fn={loadMenuItems} className="hidden sm:block" />
                 </div>
 
                 {/* Search and Filter Controls */}
