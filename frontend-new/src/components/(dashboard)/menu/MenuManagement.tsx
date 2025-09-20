@@ -16,6 +16,7 @@ import type { MenuItem } from '@/lib/types'
 import MenuItemCard from './cards/MenuItemCard'
 import AddNewItemCard from './cards/AddNewItemCard'
 import MenuAddEditModal from './modals/MenuAddEditModal'
+import ReLoadButton from './cards/ReloadButton'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBorderAll } from '@fortawesome/free-solid-svg-icons'
 
@@ -64,6 +65,7 @@ export default function MenuManagement() {
     }, [])
 
     const loadMenuItems = async () => {
+        setLoading(true)
         try {
             const data = await apiService.menu.getAll()
             console.log('Menu items from API:', data)
@@ -196,12 +198,13 @@ export default function MenuManagement() {
                     <div className="bg-primary/10 rounded-xl p-3">
                         <Search className="text-primary h-6 w-6" />
                     </div>
-                    <div>
+                    <div className="flex-1">
                         <h2 className="text-foreground text-xl font-semibold">Tìm kiếm & Lọc</h2>
                         <p className="text-muted-foreground text-sm">
                             Tìm kiếm món ăn và lọc theo danh mục
                         </p>
                     </div>
+                    <ReLoadButton fn={loadMenuItems} />
                 </div>
 
                 {/* Search and Filter Controls */}
