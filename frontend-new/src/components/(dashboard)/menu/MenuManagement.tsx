@@ -194,7 +194,7 @@ export default function MenuManagement() {
         <div className="space-y-8">
             {/* Header Section */}
             <div className="bg-card/50 border-border/50 rounded-2xl border p-6 shadow-lg backdrop-blur-sm select-none">
-                <div className="mb-6 flex items-center gap-4">
+                <div className="mb-6 flex items-center justify-between gap-4">
                     <div className="bg-primary/10 rounded-xl p-3">
                         <Search className="text-primary h-6 w-6" />
                     </div>
@@ -204,7 +204,7 @@ export default function MenuManagement() {
                             Tìm kiếm món ăn và lọc theo danh mục
                         </p>
                     </div>
-                    <ReLoadButton fn={loadMenuItems} className="hidden sm:block" />
+                    <ReLoadButton fn={loadMenuItems} className="hidden sm:flex" />
                 </div>
 
                 {/* Search and Filter Controls */}
