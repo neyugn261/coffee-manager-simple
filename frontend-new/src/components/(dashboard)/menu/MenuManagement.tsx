@@ -250,11 +250,10 @@ export default function MenuManagement() {
                     </div>
 
                     {/* Mobile Category Filter */}
-                    <div className="sm:hidden">
+                    <div className="flex w-full flex-row items-center justify-between sm:hidden">
                         <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                             <SelectTrigger className="bg-input border-border text-foreground focus:ring-primary/20 h-12 rounded-xl transition-all duration-200 focus:ring-2">
                                 <div className="flex items-center gap-2">
-                                    <Filter className="h-4 w-4" />
                                     <SelectValue placeholder="Lọc danh mục" />
                                 </div>
                             </SelectTrigger>
@@ -279,6 +278,7 @@ export default function MenuManagement() {
                                 ))}
                             </SelectContent>
                         </Select>
+                        <ReLoadButton fn={loadMenuItems} />
                     </div>
                 </div>
 
